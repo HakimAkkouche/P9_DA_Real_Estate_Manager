@@ -2,18 +2,19 @@ package com.haksoftware.realestatemanager.utils
 
 import android.content.Context
 import android.net.wifi.WifiManager
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class Utils {
+    private val euroValue = 0.93f
     /**
      * Conversion d'un prix d'un bien immobilier (Dollars vers Euros)
      * NOTE : NE PAS SUPPRIMER, A MONTRER DURANT LA SOUTENANCE
      * @param dollars Montant en dollars à convertir en euros
      * @return Montant converti en euros
      */
-    fun convertDollarToEuro(dollars: Int): Int {
-        return (dollars * 0.812).toInt()
+    fun convertDollarToEuro(dollars: Float): Float {
+        return dollars * euroValue
     }
 
     /**
@@ -22,8 +23,7 @@ class Utils {
      * @return Date formatée au format "yyyy/MM/dd"
      */
     fun getTodayDate(): String {
-        val dateFormat = SimpleDateFormat("yyyy/MM/dd")
-        return dateFormat.format(Date())
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
     }
 
     /**
