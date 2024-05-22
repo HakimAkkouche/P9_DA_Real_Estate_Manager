@@ -1,17 +1,17 @@
-package com.haksoftware.p9_da_real_estate_manager.ui.slideshow
+package com.haksoftware.p9_da_real_estate_manager.ui.edit
 
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentSlideshowBinding
+import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentEditBinding
+import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 
-class DetailsFragment : Fragment() {
+class EditFragment : Fragment() {
 
-    private var _binding: FragmentSlideshowBinding? = null
+    private var _binding: FragmentEditBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,16 +22,13 @@ class DetailsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val detailsViewModel =
-            ViewModelProvider(this).get(DetailsViewModel::class.java)
+        val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
+        val editViewModel = ViewModelProvider(this, viewModelFactory)[EditViewModel::class.java]
 
-        _binding = FragmentSlideshowBinding.inflate(inflater, container, false)
+        _binding = FragmentEditBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textSlideshow
-        detailsViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
-        }
+
         return root
     }
 

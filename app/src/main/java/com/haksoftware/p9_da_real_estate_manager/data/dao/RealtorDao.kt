@@ -12,7 +12,7 @@ import com.haksoftware.p9_da_real_estate_manager.data.entity.RealtorEntity
 interface RealtorDao {
     @Transaction
     @Query("select * from realtor")
-    fun getPointOfInterest(): LiveData<List<RealtorEntity>>
+    fun getAllRealtor(): LiveData<List<RealtorEntity>>
     @Insert
     fun insert(realtor: RealtorEntity)
     @Update

@@ -1,25 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--suppress NavigationFile -->
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/nav_home">
+    app:startDestination="@+id/nav_real_estates">
 
     <fragment
-        android:id="@+id/nav_home"
-        android:name="com.haksoftware.p9_da_real_estate_manager.ui.list.RealEstatesFragment"
-        android:label="@string/menu_home"
-        tools:layout="@layout/fragment_home" />
+        android:id="@+id/nav_real_estates"
+        android:name="com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesFragment"
+        android:label="@string/menu_real_estates"
+        tools:layout="@layout/fragment_real_estates">
+        <action
+            android:id="@+id/action_nav_real_estates_to_nav_detail"
+            app:destination="@id/nav_detail">
+        </action>
+    </fragment>
 
     <fragment
-        android:id="@+id/nav_gallery"
-        android:name="com.haksoftware.p9_da_real_estate_manager.ui.gallery.GalleryFragment"
-        android:label="@string/menu_gallery"
-        tools:layout="@layout/fragment_gallery" />
+        android:id="@+id/nav_detail"
+        android:name="com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailFragment"
+        android:label="@string/menu_details"
+        tools:layout="@layout/fragment_detail" >
+
+        <argument
+            android:name="realEstate"
+            app:argType="com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails" />
+    </fragment>
+    <fragment
+        android:id="@+id/nav_add"
+        android:name="com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddRealEstateFragment"
+        android:label="@string/menu_add"
+        tools:layout="@layout/fragment_add_real_estate" />
 
     <fragment
-        android:id="@+id/nav_slideshow"
-        android:name="com.haksoftware.p9_da_real_estate_manager.ui.slideshow.DetailsFragment"
-        android:label="@string/menu_slideshow"
-        tools:layout="@layout/fragment_slideshow" />
+        android:id="@+id/nav_edit"
+        android:name="com.haksoftware.p9_da_real_estate_manager.ui.edit.EditFragment"
+        android:label="@string/menu_edit"
+        tools:layout="@layout/fragment_edit" />
 </navigation>

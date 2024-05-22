@@ -6,17 +6,17 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.haksoftware.p9_da_real_estate_manager.data.entity.TypeEstateEntity
+import com.haksoftware.p9_da_real_estate_manager.data.entity.TypeEntity
 
 @Dao
 interface TypeDao {
     @Transaction
-    @Query("select * from type_estate")
-    fun getPointOfInterest(): LiveData<List<TypeEstateEntity>>
+    @Query("select * from type")
+    fun getAllTypes(): LiveData<List<TypeEntity>>
     @Insert
-    fun insertType(type: TypeEstateEntity)
+    fun insertType(type: TypeEntity)
     @Update
-    fun update(type: TypeEstateEntity) : Int
-    @Query("DELETE FROM type_estate where idType = :type")
+    fun update(type: TypeEntity) : Int
+    @Query("DELETE FROM type where idType = :type")
     fun delete(type: Int): Int
 }
