@@ -1,6 +1,8 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.addrealestate
 
+import android.R
 import android.annotation.SuppressLint
+import android.location.Geocoder
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import android.text.Editable
@@ -10,57 +12,71 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
+import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.chip.Chip
+import com.google.android.material.snackbar.Snackbar
+import com.haksoftware.p9_da_real_estate_manager.BuildConfig
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealtorEntity
 import com.haksoftware.p9_da_real_estate_manager.data.entity.TypeEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentAddRealEstateBinding
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
+import com.haksoftware.realestatemanager.utils.Utils
 import kotlinx.coroutines.launch
+import java.util.Locale
 
 class AddRealEstateFragment : Fragment(), AddPhotoListener{
 
     private lateinit var viewModel: AddRealEstateViewModel
     private var _binding: FragmentAddRealEstateBinding? = null
     private val binding get() = _binding!!
+    private lateinit var placesClient: PlacesClient
+    private lateinit var addressAutoCompleteAdapter: ArrayAdapter<String>
+    private var roomCount = 0
+    private var bathroomCount = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
+        viewModel = ViewModelProvider(this, viewModelFactory)[AddRealEstateViewModel::class.java]
         _binding = FragmentAddRealEstateBinding.inflate(inflater, container, false)
-        binding.pickerRoomCount.minValue = 1
-        binding.pickerRoomCount.maxValue = 10
-        binding.pickerBathroomCount.minValue = 0
-        binding.pickerBathroomCount.maxValue = 4
+        binding.editTextRoomCount.text = roomCount.toString()
+        binding.editTextBathroomCount.text = bathroomCount.toString()
+        viewModel.updateRoomCount(roomCount)
+        viewModel.updateBathroomCount(bathroomCount)
+
+        // Initialize the Places API with the API key
+        if (!Places.isInitialized()) {
+            Places.initialize(requireContext(), BuildConfig.GOOGLE_MAPS_API_KEY)
+        }
+        placesClient = Places.createClient(requireContext())
+
+        setupAutoCompleteTextView()
         return binding.root
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
 
-        val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
-        viewModel = ViewModelProvider(this, viewModelFactory)[AddRealEstateViewModel::class.java]
+
         initRealtor()
         initTypes()
         initChips()
         setupRecyclerView()
         setupTextWatchers()
+        setupObservers()
+
         binding.buttonSubmit.setOnClickListener {
-            val price = binding.editPrice.text.toString().toInt()
-            val surface = binding.editSurface.text.toString().toInt()
-            val description = binding.editDescription.text.toString()
-            val address = binding.editAddress.text.toString()
-            val postalCode = binding.editPostalCode.text.toString()
-            val city = binding.editCity.text.toString()
-            val state = binding.editState.text.toString()
-            val roomCount = binding.pickerRoomCount.value
-            val bathroomCount = binding.pickerBathroomCount.value
-            val idRealtor = (binding.spinnerRealtor.selectedItem as RealtorEntity).idRealtor// Get selected realtor ID from spinner
-            val idType = (binding.spinnerType.selectedItem as TypeEntity).idType // Get selected type ID from spinner
-            val pointsOfInterest = binding.chipGroupPointOfInterest.checkedChipIds
             viewModel.saveRealEstate()
         }
 
@@ -96,6 +112,16 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
             }
         }
     }
+    private fun setupObservers() {
+        viewModel.insertSuccess.observe(viewLifecycleOwner) { success ->
+            if (success) {
+                Snackbar.make(binding.root, "Real estate saved successfully", Snackbar.LENGTH_SHORT).show()
+                findNavController().navigate(AddRealEstateFragmentDirections.actionNavAddToNavRealEstates())
+            } else {
+                Snackbar.make(binding.root, "Failed to save real estate", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     private fun setupRecyclerView() {
@@ -105,24 +131,105 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
         val adapterPhotos = AddPhotoAdapter(requireContext(), mutableListOf(), this)
         recyclerViewPhotos.adapter = adapterPhotos
 
-        viewModel.photoViewStateList.observe(viewLifecycleOwner) {
+        viewModel.photoViewStateListLiveData.observe(viewLifecycleOwner) {
             adapterPhotos.notifyDataSetChanged()
         }
     }
-    private fun setupTextWatchers() {
-        binding.editPrice.addTextChangedListener(createTextWatcher { viewModel.updatePrice(it) })
-        binding.editSurface.addTextChangedListener(createTextWatcher { viewModel.updateSurface(it) })
-        binding.editDescription.addTextChangedListener(createTextWatcher { viewModel.updateDescription(it) })
-        binding.editAddress.addTextChangedListener(createTextWatcher { viewModel.updateAddress(it) })
-        binding.editPostalCode.addTextChangedListener(createTextWatcher { viewModel.updatePostalCode(it) })
-        binding.editCity.addTextChangedListener(createTextWatcher { viewModel.updateCity(it) })
-        binding.editState.addTextChangedListener(createTextWatcher { viewModel.updateState(it) })
+    private fun setupAutoCompleteTextView() {
+        addressAutoCompleteAdapter = ArrayAdapter(requireContext(), R.layout.simple_dropdown_item_1line)
+        binding.autocompleteAddress.setAdapter(addressAutoCompleteAdapter)
 
-        binding.pickerRoomCount.setOnValueChangedListener { _, _, newVal ->
-            viewModel.updateRoomCount(newVal)
+        binding.autocompleteAddress.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!s.isNullOrEmpty()) {
+                    val request = FindAutocompletePredictionsRequest.builder()
+                        .setQuery(s.toString())
+                        .build()
+
+                    placesClient.findAutocompletePredictions(request).addOnSuccessListener { response ->
+                        val predictions = response.autocompletePredictions
+                        val suggestionList = predictions.map { it.getFullText(null).toString() }
+                        addressAutoCompleteAdapter.clear()
+                        addressAutoCompleteAdapter.addAll(suggestionList)
+                        addressAutoCompleteAdapter.notifyDataSetChanged()
+                    }.addOnFailureListener { exception ->
+                        if (exception is ApiException) {
+                            Toast.makeText(context, "Error: ${exception.statusCode}", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        })
+
+        binding.autocompleteAddress.setOnItemClickListener { parent, view, position, id ->
+            val selectedAddress = addressAutoCompleteAdapter.getItem(position)
+            binding.autocompleteAddress.setText(selectedAddress)
+
+            // Optionally, use Geocoder to get more detailed information if needed
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val addresses = geocoder.getFromLocationName(selectedAddress!!, 1)
+
+            if (addresses!!.isNotEmpty()) {
+                val address = addresses[0]
+                viewModel.updateAddress(address.subThoroughfare+ " " + address.thoroughfare)
+                val city = if(address.subLocality != null) {
+                    address.subLocality
+                } else {
+                    address.locality
+                }
+                viewModel.updateCity(city)
+                viewModel.updateZipCode(address.postalCode)
+                viewModel.updateCountry(address.countryName)
+            }
         }
-        binding.pickerBathroomCount.setOnValueChangedListener { _, _, newVal ->
-            viewModel.updateBathroomCount(newVal)
+    }
+    private fun setupTextWatchers() {
+        binding.editPrice.addTextChangedListener(createTextWatcher {
+            viewModel.updatePrice(it)
+            if(it.isNotEmpty()) {
+                updatePriceInEuro(it)
+            }
+        })
+        binding.editSurface.addTextChangedListener(createTextWatcher {
+            viewModel.updateSurface(it)
+            if(it.length >2) {
+                updateSurfaceInM2(it)
+            }
+        })
+        binding.editDescription.addTextChangedListener(createTextWatcher { viewModel.updateDescription(it) })
+
+        binding.buttonIncrementRoomCount.setOnClickListener {
+            roomCount += 1
+            binding.editTextRoomCount.text = roomCount.toString()
+            viewModel.updateRoomCount(roomCount)
+
+        }
+
+        binding.buttonDecrementRoomCount.setOnClickListener {
+            if (roomCount > 0) {
+                roomCount -= 1
+                binding.editTextRoomCount.text = roomCount.toString()
+                viewModel.updateRoomCount(roomCount)
+            }
+        }
+
+        // Gestion des boutons plus et moins pour le pickerBathroomCount
+        binding.buttonIncrementBathroomCount.setOnClickListener {
+            bathroomCount += 1
+            binding.editTextBathroomCount.text = bathroomCount.toString()
+            viewModel.updateBathroomCount(bathroomCount)
+        }
+
+        binding.buttonDecrementBathroomCount.setOnClickListener {
+            if (bathroomCount > 0) {
+                bathroomCount -= 1
+                binding.editTextBathroomCount.text = bathroomCount.toString()
+                viewModel.updateBathroomCount(bathroomCount)
+            }
         }
 
         binding.spinnerRealtor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -143,12 +250,29 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        binding.chipGroupPointOfInterest.setOnCheckedChangeListener { group, _ ->
+        binding.chipGroupPointOfInterest.setOnCheckedStateChangeListener {  group, _ ->
             val checkedIds = group.checkedChipIds
             viewModel.updatePointsOfInterest(checkedIds)
         }
     }
+    private fun updatePriceInEuro(price: String) {
+        val priceInEuro = try {
 
+            Utils.convertDollarToEuro(price.toFloat())
+        } catch (e: NumberFormatException) {
+            0.0
+        }
+        binding.textviewPriceInEuro.text = String.format("%d €", priceInEuro)
+    }
+
+    private fun updateSurfaceInM2(surface: String) {
+        val surfaceInM2 = try {
+            Utils.convertFtSquareToMSquare(surface.toFloat())
+        } catch (e: NumberFormatException) {
+            0.0
+        }
+        binding.textviewSurfaceInM2.text = String.format("%d m²", surfaceInM2)
+    }
     private fun createTextWatcher(update: (String) -> Unit): TextWatcher {
         return object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

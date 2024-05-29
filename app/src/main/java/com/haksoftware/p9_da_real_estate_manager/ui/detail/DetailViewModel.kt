@@ -1,15 +1,13 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.detail
 
-import android.app.Application
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.haksoftware.p9_da_real_estate_manager.data.repository.RealEstateRepository
+import com.haksoftware.p9_da_real_estate_manager.BuildConfig
+import com.haksoftware.p9_da_real_estate_manager.data.repository.MapRepository
 
-class DetailViewModel(application: Application, realEstateRepository: RealEstateRepository) : ViewModel() {
+class DetailViewModel(private val repository: MapRepository) : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is gallery Fragment"
+    fun getMapUrl(address: String): String {
+
+        return repository.getMapUrl(address)
     }
-    val text: LiveData<String> = _text
 }

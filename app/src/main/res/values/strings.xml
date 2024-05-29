@@ -33,4 +33,9 @@
     <string name="empty">Empty</string>
     <string name="add_a_picture">Add a picture</string>
     <string name="picture">Picture</string>
+    <string name="plus">+</string>
+    <string name="minus">—</string>
+    <string name="lorem_ipsum_1_paragraph">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam at sagittis nunc. Vivamus dapibus purus augue, vel aliquet lorem pretium at. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris feugiat, ipsum dapibus euismod dictum, dolor tellus laoreet velit, vel rhoncus dui eros non ante. Donec placerat nibh ut iaculis efficitur. Phasellus sed turpis nulla. In et elementum ante, quis interdum neque. Pellentesque tincidunt consequat lorem at imperdiet. Aliquam ac diam vehicula, suscipit nibh sit amet, euismod libero. Suspendisse potenti. Integer massa lorem, congue quis felis eu, ornare laoreet ligula. Etiam eu leo aliquet, vestibulum purus eu, viverra neque. Etiam et finibus turpis. Pellentesque in interdum nunc, quis lobortis risus. In hac habitasse platea dictumst.</string>
+    <string name="media">Media</string>
+    <string name="location">Location</string>
 </resources>

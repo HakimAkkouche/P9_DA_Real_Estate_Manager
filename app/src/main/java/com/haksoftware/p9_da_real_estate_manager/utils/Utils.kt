@@ -2,12 +2,16 @@ package com.haksoftware.realestatemanager.utils
 
 import android.content.Context
 import android.net.Uri
-import android.net.wifi.WifiManager
 import java.io.File
 import java.io.FileOutputStream
+import java.io.IOException
 import java.io.InputStream
+import java.net.InetAddress
+import java.text.NumberFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.math.roundToInt
 
 object Utils {
     private const val euroValue = 0.93f
@@ -17,8 +21,12 @@ object Utils {
      * @param dollars Montant en dollars à convertir en euros
      * @return Montant converti en euros
      */
-    fun convertDollarToEuro(dollars: Float): Float {
-        return dollars * euroValue
+    fun convertDollarToEuro(dollars: Float): Int {
+        return (dollars * euroValue).roundToInt()
+    }
+
+    fun convertFtSquareToMSquare(surface: Float): Int {
+        return (surface / 10.764f).roundToInt()
     }
 
     /**
@@ -36,10 +44,19 @@ object Utils {
      * @param context Contexte de l'application
      * @return Boolean indiquant si la connexion Internet est disponible
      */
+    fun isInternetAvailable(): Boolean {
+        return try {
+            val address: InetAddress = InetAddress.getByName("www.google.com")
+            !address.equals("")
+        } catch (e: IOException) {
+            false
+        }
+    }/*
     fun isInternetAvailable(context: Context): Boolean {
         val wifiManager = context.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
         return wifiManager.isWifiEnabled
-    }
+    }*/
     fun saveImageToInternalStorage(context: Context, uri: Uri, filename: String): String {
         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
         val directory = File(context.filesDir, "images")
@@ -52,5 +69,9 @@ object Utils {
         outputStream.close()
         inputStream?.close()
         return file.absolutePath
+    }
+    fun formatNumberToUSStyle(number: Int): String {
+        val numberFormat = NumberFormat.getNumberInstance(Locale.US)
+        return "$" + numberFormat.format(number)
     }
 }

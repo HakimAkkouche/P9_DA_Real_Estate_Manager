@@ -27,8 +27,8 @@ data class RealEstateEntity (
     var postalCode: String,
     var city: String,
     var state: String,
-    var creationDate: String,
-    var soldDate: String?,
+    var creationDate: Long,
+    var soldDate: Long?,
     var idRealtor: Int,
     var idType: Int
 ): Parcelable {
@@ -43,8 +43,8 @@ data class RealEstateEntity (
         parcel.readString()!!,
         parcel.readString()!!,
         parcel.readString()!!,
-        parcel.readString()!!,
-        parcel.readString(),
+        parcel.readLong(),
+        parcel.readLong(),
         parcel.readInt(),
         parcel.readInt()
     ) {
@@ -61,8 +61,8 @@ data class RealEstateEntity (
         parcel.writeString(postalCode)
         parcel.writeString(city)
         parcel.writeString(state)
-        parcel.writeString(creationDate)
-        parcel.writeString(soldDate)
+        parcel.writeLong(creationDate)
+        parcel.writeLong(soldDate!!)
         parcel.writeInt(idRealtor)
         parcel.writeInt(idType)
     }

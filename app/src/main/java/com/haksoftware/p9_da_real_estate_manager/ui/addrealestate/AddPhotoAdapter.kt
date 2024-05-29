@@ -45,7 +45,6 @@ class AddPhotoAdapter(
     }
 
     override fun getItemCount(): Int {
-        // Ajouter 1 pour l'en-tête
         return photoList.size + 1
     }
 
@@ -69,7 +68,7 @@ class AddPhotoAdapter(
 
     override fun onPhotoDialogAdded(photoViewState: PhotoViewState) {
         photoList.add(photoViewState)
-        notifyItemInserted(photoList.size - 1)
+        notifyItemInserted(photoList.size )
         addPhotoClickListener.onPhotoAdded(photoViewState)
     }
 }

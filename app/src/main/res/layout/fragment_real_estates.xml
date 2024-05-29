@@ -21,13 +21,4 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_marginEnd="@dimen/fab_margin"
-        android:contentDescription="@string/action_add"
-        android:layout_marginBottom="16dp"
-        app:srcCompat="@drawable/ic_add_24" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

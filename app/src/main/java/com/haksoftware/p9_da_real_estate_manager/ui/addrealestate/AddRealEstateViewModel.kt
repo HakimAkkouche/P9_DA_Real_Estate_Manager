@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.haksoftware.p9_da_real_estate_manager.data.entity.IsNextToEntity
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
@@ -17,12 +18,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.util.UUID
 
 class AddRealEstateViewModel(application: Application, private val realEstateRepository: RealEstateRepository) : AndroidViewModel(application) {
-
+    private val _insertSuccess = MutableLiveData<Boolean>()
+    val insertSuccess: LiveData<Boolean> get() = _insertSuccess
     private val _pOiLiveData: LiveData<List<PointOfInterestEntity>> = realEstateRepository.getAllPointOfInterest()
     private val _realtorsLiveData: LiveData<List<RealtorEntity>> = realEstateRepository.getAllRealtor()
     private val _typesLiveData: LiveData<List<TypeEntity>> = realEstateRepository.getAllTypes()
@@ -30,10 +36,10 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
     private val _price = MutableStateFlow("")
     private val _surface = MutableStateFlow("")
     private val _description = MutableStateFlow("")
-    private val _address = MutableStateFlow("")
-    private val _postalCode = MutableStateFlow("")
-    private val _city = MutableStateFlow("")
-    private val _state = MutableStateFlow("")
+    private val _address = MutableLiveData<String>()
+    private val _city = MutableLiveData<String>()
+    private val _zipCode = MutableLiveData<String>()
+    private val _country = MutableLiveData<String>()
     private val _soldDate = MutableStateFlow("")
     private val _roomCount = MutableStateFlow(0)
     private val _bathroomCount = MutableStateFlow(0)
@@ -45,41 +51,53 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
     val realtorLiveData: LiveData<List<RealtorEntity>> get() = _realtorsLiveData
     val typesLiveData: LiveData<List<TypeEntity>> get() = _typesLiveData
 
-    private val _photoViewStateList = MutableLiveData<MutableList<PhotoViewState>>()
-    val photoViewStateList: LiveData<MutableList<PhotoViewState>> get() = _photoViewStateList
 
     // Public StateFlows to be observed from the Fragment
     val price: StateFlow<String> = _price
     val surface: StateFlow<String> = _surface
     val description: StateFlow<String> = _description
-    val address: StateFlow<String> = _address
-    val postalCode: StateFlow<String> = _postalCode
-    val city: StateFlow<String> = _city
-    val state: StateFlow<String> = _state
+    val address: LiveData<String> = _address
+    val city: LiveData<String> = _city
+    val zipCode: LiveData<String> = _zipCode
+    val country: LiveData<String> = _country
     val soldDate: StateFlow<String> = _soldDate
     val roomCount: StateFlow<Int> = _roomCount
     val bathroomCount: StateFlow<Int> = _bathroomCount
     val idRealtor: StateFlow<Int> = _idRealtor
     val idType: StateFlow<Int> = _idType
     val pointsOfInterest: StateFlow<List<Int>> = _pointsOfInterest
+
+    private val _photoViewStateList = MutableStateFlow<MutableList<PhotoViewState>>(mutableListOf())
+    val photoViewStateList: StateFlow<MutableList<PhotoViewState>> get() = _photoViewStateList
+
+    // Transform StateFlow to LiveData
+    val photoViewStateListLiveData: LiveData<List<PhotoViewState>> = _photoViewStateList
+        .map { it.toList() }
+        .asLiveData()
     fun addPhotoViewState(photoViewState: PhotoViewState) {
-        _photoViewStateList.value?.let { list ->
-            list.add(photoViewState)
-            _photoViewStateList.value = list
+        _photoViewStateList.update { list ->
+            list.apply { add(photoViewState) }
         }
     }
 
-    // Combined StateFlow to check if the form is valid
+    // Vérifier la validité des champs texte
     val isFormValid: StateFlow<Boolean> = combine(
-        _price, _surface, _description, _address, _postalCode, _city, _state
+        _price, _surface, _description
     ) { values: Array<String> ->
-        values[0].isNotBlank() && values[1].isNotBlank() && values[2].isNotBlank() &&
-                values[3].isNotBlank() && values[4].isNotBlank() && values[5].isNotBlank() && values[6].isNotBlank()
+        values[0].isNotBlank() && values[1].isNotBlank() && values[2].isNotBlank()
     }.stateIn(
         viewModelScope,
         SharingStarted.Lazily,
         false
     )
+    private val isPhotoListNotEmpty: StateFlow<Boolean> = _photoViewStateList
+        .map { it.isNotEmpty() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.Lazily,
+            false
+        )
+
 
     fun updatePrice(price: String) {
         _price.value = price
@@ -93,21 +111,19 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
         _description.value = description
     }
 
+    fun updateZipCode(zipCode: String) {
+        _zipCode.value = zipCode
+    }
+    fun updateCity(city: String) {
+        _city.value = city
+    }
+    fun updateCountry(country: String) {
+        _country.value = country
+    }
     fun updateAddress(address: String) {
         _address.value = address
     }
 
-    fun updatePostalCode(postalCode: String) {
-        _postalCode.value = postalCode
-    }
-
-    fun updateCity(city: String) {
-        _city.value = city
-    }
-
-    fun updateState(state: String) {
-        _state.value = state
-    }
 
     fun updateSoldDate(soldDate: String) {
         _soldDate.value = soldDate
@@ -134,62 +150,67 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
     }
     fun saveRealEstate() {
         viewModelScope.launch {
-            val price = _price.value.toInt()
-            val surface = _surface.value.toInt()
-            val description = _description.value
-            val address = _address.value
-            val postalCode = _postalCode.value
-            val city = _city.value
-            val state = _state.value
-            val roomCount = _roomCount.value
-            val bathroomCount = _bathroomCount.value
-            val idRealtor = _idRealtor.value
-            val idType = _idType.value
-            val pointsOfInterest = _pointsOfInterest.value
-            val photos = photoViewStateList.value.orEmpty()
+            try {
+                val price = _price.value.toInt()
+                val surface = _surface.value.toInt()
+                val description = _description.value
+                val address = _address.value
+                val zipCode = _zipCode.value
+                val city = _city.value
+                val state = _country.value
+                val roomCount = _roomCount.value
+                val bathroomCount = _bathroomCount.value
+                val idRealtor = _idRealtor.value
+                val idType = _idType.value
+                val pointsOfInterest = _pointsOfInterest.value
+                val photos = photoViewStateList.value
 
-            val realEstateEntity = RealEstateEntity(
-                idRealEstate = 0, // Auto-generated by Room
-                price = price,
-                squareFeet = surface,
-                roomCount = roomCount,
-                bathroomCount = bathroomCount,
-                descriptionRealEstate = description,
-                address = address,
-                postalCode = postalCode,
-                city = city,
-                state = state,
-                creationDate = Utils.getTodayDate(),
-                soldDate = "",
-                idRealtor = idRealtor,
-                idType = idType
-            )
-
-            // Insert real estate
-            val realEstateId = realEstateRepository.insertRealEstate(realEstateEntity).toInt()
-
-            // Insert photos
-            val photoEntities = photos.map { photo ->
-                val filename = UUID.randomUUID().toString() + ".jpg"
-                val filePath = Utils.saveImageToInternalStorage(getApplication(), photo.imageUri!!, filename)
-                PhotoEntity(
-                    idPhoto = 0, // Auto-generated by Room
-                    namePhoto = filePath,
-                    descriptionPhoto = photo.description,
-                    idRealEstate = realEstateId
+                val realEstateEntity = RealEstateEntity(
+                    idRealEstate = 0, // Auto-generated by Room
+                    price = price,
+                    squareFeet = surface,
+                    roomCount = roomCount,
+                    bathroomCount = bathroomCount,
+                    descriptionRealEstate = description,
+                    address = address!!,
+                    postalCode = zipCode!!,
+                    city = city!!,
+                    state = state!!,
+                    creationDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
+                    soldDate = -1,
+                    idRealtor = idRealtor,
+                    idType = idType
                 )
-            }
-            realEstateRepository.insertPhotos(photoEntities)
 
-            // Insert associations with points of interest
-            val isNextToEntities = pointsOfInterest.map { poiId ->
-                IsNextToEntity(
-                    idRealEstate = realEstateId,
-                    idPoi = poiId
-                )
+                // Insert real estate
+                val realEstateId = realEstateRepository.insertRealEstate(realEstateEntity).toInt()
+
+                // Insert photos
+                val photoEntities = photos!!.map { photo ->
+                    val filename = UUID.randomUUID().toString() + ".jpg"
+                    val filePath = Utils.saveImageToInternalStorage(getApplication(), photo.imageUri!!, filename)
+                    PhotoEntity(
+                        idPhoto = 0, // Auto-generated by Room
+                        namePhoto = filePath,
+                        descriptionPhoto = photo.description,
+                        idRealEstate = realEstateId
+                    )
+                }
+                realEstateRepository.insertPhotos(photoEntities)
+
+                // Insert associations with points of interest
+                val isNextToEntities = pointsOfInterest.map { poiId ->
+                    IsNextToEntity(
+                        idRealEstate = realEstateId,
+                        idPoi = poiId
+                    )
+                }
+                realEstateRepository.insertIsNextToEntities(isNextToEntities)
+
+                _insertSuccess.postValue(true)
+            } catch (e: Exception) {
+                _insertSuccess.postValue(false)
             }
-            realEstateRepository.insertIsNextToEntities(isNextToEntities)
         }
     }
-
 }

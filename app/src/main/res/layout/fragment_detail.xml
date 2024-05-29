@@ -1,82 +1,219 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/photo_gallery"
+    android:padding="8dp">
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp" />
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/text_type_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/media"
+                />
 
-    <TextView
-        android:id="@+id/text_price"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/photo_gallery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+        </LinearLayout>
 
-    <TextView
-        android:id="@+id/text_square_feet"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@+id/text_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawablePadding="8dp"
+            tools:text="1 000 000 $"
+            android:layout_columnWeight="1"
+            app:drawableLeftCompat="@drawable/ic_money_dollar" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/description"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/text_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginBottom="16dp"
+                tools:text="@string/lorem_ipsum_1_paragraph"/>
+        </LinearLayout>
+        <TableLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:stretchColumns="1">
 
-    <TextView
-        android:id="@+id/text_room_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <!-- First Row: text_type and text_square_feet -->
+            <TableRow
+                android:padding="5dp">
+                <TextView
+                    android:id="@+id/text_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
+                    android:layout_marginEnd="16dp"
+                    app:drawableLeftCompat="@drawable/ic_type"
+                    tools:text="@string/type" />
+                <TextView
+                    android:id="@+id/text_square_feet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
+                    app:drawableLeftCompat="@drawable/ic_surface"
+                    tools:text="@string/square_feet" />
+            </TableRow>
 
-    <TextView
-        android:id="@+id/text_bathroom_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <!-- Second Row: text_room_count and text_bathroom_count -->
+            <TableRow
+                android:padding="5dp">
+                <TextView
+                    android:id="@+id/text_room_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
+                    app:drawableLeftCompat="@drawable/ic_room"
+                    tools:text="@string/room_count"
+                    android:layout_marginEnd="16dp" />
+                <TextView
+                    android:id="@+id/text_bathroom_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawablePadding="8dp"
+                    app:drawableLeftCompat="@drawable/ic_bathroom"
+                    tools:text="@string/bathroom_count" />
+            </TableRow>
+            <TableRow
+                android:padding="5dp">
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/chip_group_point_of_interest"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:singleLine="false"
+                    android:layout_marginTop="16dp"/>
+            </TableRow>
 
-    <TextView
-        android:id="@+id/text_description"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <!-- Third Row: layout_location (wrapped in a TableRow for spanning) -->
+            <TableRow
+                android:padding="5dp"
+                android:gravity="center">
+                <LinearLayout
+                    android:id="@+id/layout_location"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_span="2">
 
-    <TextView
-        android:id="@+id/text_address"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:drawableLeftCompat="@drawable/ic_location"
+                        android:drawablePadding="8dp"
+                        android:text="@string/location" />
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_marginStart="8dp">
+                        <TextView
+                            android:id="@+id/text_address"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="15 rue Blomet" />
+                        <TextView
+                            android:id="@+id/text_postal_code_city"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="75015 PARIS" />
+                        <TextView
+                            android:id="@+id/text_state"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="FRANCE" />
+                    </LinearLayout>
+                </LinearLayout>
+            </TableRow>
 
-    <TextView
-        android:id="@+id/text_postal_code"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+            <!-- Fourth Row: mapImageView (wrapped in a TableRow for spanning) -->
+            <TableRow>
+                <ImageView
+                    android:id="@+id/mapImageView"
+                    android:layout_width="0dp"
+                    android:layout_height="200dp"
+                    android:layout_span="2"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginStart="16dp" />
+            </TableRow>
+            <TableRow
+                android:padding="5dp">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_span="1"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp">
 
-    <TextView
-        android:id="@+id/text_city"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+                    <TextView
+                        android:id="@+id/text_realtor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:drawableLeftCompat="@drawable/ic_contact_24"
+                        android:drawablePadding="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginStart="16dp"
+                        tools:text="John Smith" />
 
-    <TextView
-        android:id="@+id/text_state"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+                    <TextView
+                        android:id="@+id/text_realtor_number"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:drawableLeftCompat="@drawable/ic_phone_24"
+                        android:drawablePadding="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginStart="16dp"
+                        tools:text="0123456789" />
+                    <TextView
+                        android:id="@+id/text_realtor_email"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:drawableLeftCompat="@drawable/ic_email_24"
+                        android:drawablePadding="8dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginStart="16dp"
+                        tools:text="john.smith@realtor.com" />
+                </LinearLayout>
+            </TableRow>
+        </TableLayout>
 
-    <TextView
-        android:id="@+id/text_creation_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <!--        <TextView
+                android:id="@+id/text_creation_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />-->
 
-    <TextView
-        android:id="@+id/text_sold_status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/text_sold_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:id="@+id/text_realtor_id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+        <!--    <TextView
+                android:id="@+id/text_sold_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />-->
+    </LinearLayout>
+</ScrollView>

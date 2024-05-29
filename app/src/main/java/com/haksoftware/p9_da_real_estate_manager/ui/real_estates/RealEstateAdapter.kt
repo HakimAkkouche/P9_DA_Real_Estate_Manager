@@ -11,7 +11,10 @@ import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails
 import com.haksoftware.p9_da_real_estate_manager.databinding.EmptyItemBinding
 import com.haksoftware.p9_da_real_estate_manager.databinding.RealEstateItemBinding
+import com.haksoftware.realestatemanager.utils.Utils.formatNumberToUSStyle
 import java.io.File
+import java.text.NumberFormat
+import java.util.Locale
 
 class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAdapter<RealEstateWithDetails, RecyclerView.ViewHolder>(RealEstateDiffCallback()) {
 
@@ -52,8 +55,9 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
         fun bind(realEstate: RealEstateWithDetails) {
             binding.type.text = realEstate.type.nameType
             binding.city.text = realEstate.realEstate.city
-            val price = "${realEstate.realEstate.price} $"
-            binding.price.text = price
+            binding.price.text = formatNumberToUSStyle(realEstate.realEstate.price)
+            binding.surface.text = realEstate.realEstate.squareFeet.toString()
+            binding.roomCount.text = realEstate.realEstate.roomCount.toString()
 
             val photoPath = realEstate.photos.getOrNull(0)?.namePhoto
             if (photoPath != null) {

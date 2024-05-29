@@ -3,6 +3,7 @@ package com.haksoftware.p9_da_real_estate_manager.utils
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.haksoftware.p9_da_real_estate_manager.data.repository.MapRepository
 import com.haksoftware.p9_da_real_estate_manager.data.repository.RealEstateRepository
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddRealEstateViewModel
 import com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailViewModel
@@ -11,9 +12,10 @@ import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesView
 
 
 class ViewModelFactory private constructor(
-    private val application: Application,
-    private val realEstateRepository: RealEstateRepository
+    private val application: Application
 ) : ViewModelProvider.Factory {
+    private val realEstateRepository: RealEstateRepository = RealEstateRepository(application.applicationContext)
+    private val mapRepository: MapRepository = MapRepository.getInstance()
 
     companion object {
         @Volatile
@@ -22,8 +24,7 @@ class ViewModelFactory private constructor(
         fun getInstance(application: Application): ViewModelFactory {
             return instance ?: synchronized(this) {
                 instance ?: ViewModelFactory(
-                    application,
-                    RealEstateRepository.getInstance(application)
+                    application
                 ).also { instance = it }
             }
         }
@@ -37,7 +38,7 @@ class ViewModelFactory private constructor(
             modelClass.isAssignableFrom(AddRealEstateViewModel::class.java) ->
                 AddRealEstateViewModel(application, realEstateRepository) as T
             modelClass.isAssignableFrom(DetailViewModel::class.java) ->
-                DetailViewModel(application, realEstateRepository) as T
+                DetailViewModel(mapRepository) as T
             modelClass.isAssignableFrom(EditViewModel::class.java) ->
                 EditViewModel(application, realEstateRepository) as T
             else -> throw IllegalArgumentException("Unknown ViewModel class")
