@@ -3,21 +3,18 @@ package com.haksoftware.p9_da_real_estate_manager.ui.detail
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
-import com.haksoftware.p9_da_real_estate_manager.databinding.HeaderPhotoItemBinding
 import com.haksoftware.p9_da_real_estate_manager.databinding.PhotoItemBinding
-import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.PhotoViewState
 import java.io.File
 
 class DetailsPhotoAdapter(
     private val context: Context,
-    private val photoList: List<PhotoEntity>
+    private val photoList: MutableList<PhotoEntity>
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {

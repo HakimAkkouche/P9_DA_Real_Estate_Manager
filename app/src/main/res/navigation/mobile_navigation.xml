@@ -22,6 +22,10 @@
         android:name="com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailFragment"
         android:label="@string/menu_details"
         tools:layout="@layout/fragment_detail" >
+        <action
+            android:id="@+id/action_nav_detail_to_nav_edit"
+            app:destination="@id/nav_edit">
+        </action>
         <argument
             android:name="realEstate"
             app:argType="com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails" />
@@ -40,5 +44,9 @@
         android:id="@+id/nav_edit"
         android:name="com.haksoftware.p9_da_real_estate_manager.ui.edit.EditFragment"
         android:label="@string/menu_edit"
-        tools:layout="@layout/fragment_edit" />
+        tools:layout="@layout/fragment_add_real_estate">
+        <argument
+            android:name="realEstate"
+            app:argType="com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails" />
+    </fragment>
 </navigation>

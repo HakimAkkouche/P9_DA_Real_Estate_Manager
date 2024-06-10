@@ -22,20 +22,20 @@ data class RealEstateWithDetails(
         parentColumn = "idRealEstate",
         entityColumn = "idRealEstate"
     )
-    val photos: List<PhotoEntity>,
+    val photos: MutableList<PhotoEntity>,
     @Relation(
         parentColumn = "idRealEstate",
         entityColumn = "idRealEstate"
     )
 
-    val isNextToEntities: List<IsNextToEntity>,
+    val isNextToEntities: MutableList<IsNextToEntity>,
     @Relation(
         entity = PointOfInterestEntity::class,
         parentColumn = "idRealEstate",
         entityColumn = "idPoi",
         associateBy = Junction(IsNextToEntity::class)
     )
-    val pointsOfInterest: List<PointOfInterestEntity>
+    val pointsOfInterest: MutableList<PointOfInterestEntity>
 ): Parcelable {
     constructor(parcel: Parcel) : this(
         parcel.readParcelable(RealEstateEntity::class.java.classLoader)!!,

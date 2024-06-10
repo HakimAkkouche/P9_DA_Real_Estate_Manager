@@ -1,6 +1,5 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.addrealestate
 
-import android.R
 import android.annotation.SuppressLint
 import android.location.Geocoder
 import androidx.lifecycle.ViewModelProvider
@@ -16,7 +15,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.common.api.ApiException
 import com.google.android.libraries.places.api.Places
@@ -25,15 +24,18 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.haksoftware.p9_da_real_estate_manager.BuildConfig
+import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealtorEntity
 import com.haksoftware.p9_da_real_estate_manager.data.entity.TypeEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentAddRealEstateBinding
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 import com.haksoftware.realestatemanager.utils.Utils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class AddRealEstateFragment : Fragment(), AddPhotoListener{
+class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener{
 
     private lateinit var viewModel: AddRealEstateViewModel
     private var _binding: FragmentAddRealEstateBinding? = null
@@ -42,6 +44,7 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
     private lateinit var addressAutoCompleteAdapter: ArrayAdapter<String>
     private var roomCount = 0
     private var bathroomCount = 0
+    private lateinit var adapterPhotos: AddPhotoAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,7 +64,16 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
         }
         placesClient = Places.createClient(requireContext())
 
-        setupAutoCompleteTextView()
+        binding.btnAddImage.setOnClickListener {
+            val dialog = AddPhotoDialog()
+            dialog.setListener(this)
+            dialog.show(parentFragmentManager, "AddPhotoDialog")
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            if(Utils.isInternetAvailable()) {
+                setupAutoCompleteTextView()
+            }
+        }
         return binding.root
     }
 
@@ -86,6 +98,7 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
             }
         }
     }
+
     private fun initRealtor(){
         viewModel.realtorLiveData.observe(viewLifecycleOwner) { realtorList ->
             val adapter = RealtorAdapter(requireContext(), realtorList)
@@ -126,17 +139,20 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
     @SuppressLint("NotifyDataSetChanged")
     private fun setupRecyclerView() {
         val recyclerViewPhotos: RecyclerView = binding.photoGallery
-        val layoutManager = GridLayoutManager(requireContext(), 2) // GridLayoutManager with 2 columns
+        val layoutManager = LinearLayoutManager(requireContext())
+        layoutManager.orientation = LinearLayoutManager.HORIZONTAL
         recyclerViewPhotos.layoutManager = layoutManager
-        val adapterPhotos = AddPhotoAdapter(requireContext(), mutableListOf(), this)
+        adapterPhotos = AddPhotoAdapter(mutableListOf(), this)
         recyclerViewPhotos.adapter = adapterPhotos
 
-        viewModel.photoViewStateListLiveData.observe(viewLifecycleOwner) {
+        viewModel.photoEntityListLiveData.observe(viewLifecycleOwner) {
             adapterPhotos.notifyDataSetChanged()
         }
     }
     private fun setupAutoCompleteTextView() {
-        addressAutoCompleteAdapter = ArrayAdapter(requireContext(), R.layout.simple_dropdown_item_1line)
+        addressAutoCompleteAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line)
+        binding.inputLayoutAddressAutocomplete.visibility = View.VISIBLE
+        binding.layoutAddressTextviews.visibility = View.GONE
         binding.autocompleteAddress.setAdapter(addressAutoCompleteAdapter)
 
         binding.autocompleteAddress.addTextChangedListener(object : TextWatcher {
@@ -201,6 +217,11 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
             }
         })
         binding.editDescription.addTextChangedListener(createTextWatcher { viewModel.updateDescription(it) })
+
+        binding.editAddress.addTextChangedListener(createTextWatcher { viewModel.updateAddress(it) })
+        binding.editPostalCode.addTextChangedListener(createTextWatcher { viewModel.updateZipCode(it) })
+        binding.editCity.addTextChangedListener(createTextWatcher { viewModel.updateCity(it) })
+        binding.editCountry.addTextChangedListener(createTextWatcher { viewModel.updateCountry(it) })
 
         binding.buttonIncrementRoomCount.setOnClickListener {
             roomCount += 1
@@ -286,8 +307,14 @@ class AddRealEstateFragment : Fragment(), AddPhotoListener{
         super.onDestroyView()
         _binding = null
     }
-
-    override fun onPhotoAdded(photoViewState: PhotoViewState) {
-        viewModel.addPhotoViewState(photoViewState)
+    override fun onPhotoDialogAdded(photoEntity: PhotoEntity) {
+        viewModel.addPhotoEntity(photoEntity)
+        adapterPhotos.addPhoto(photoEntity)
     }
+
+    override fun onPhotoRemoved(photoEntity: PhotoEntity) {
+        viewModel.removePhotoEntity(photoEntity)
+        adapterPhotos.removePhoto(photoEntity)
+    }
+
 }

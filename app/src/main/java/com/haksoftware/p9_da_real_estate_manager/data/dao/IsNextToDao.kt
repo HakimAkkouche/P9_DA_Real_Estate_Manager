@@ -18,4 +18,6 @@ interface IsNextToDao {
 
     @Query("SELECT * FROM Is_next_to WHERE IdPOI = :poiId")
     suspend fun getIsNextToRelationsByPoiId(poiId: String): List<IsNextToEntity>
+    @Query("DELETE FROM Is_next_to where idRealEstate = :idRealEstate")
+    fun clearPOIsBeforeUpdate(idRealEstate: Int ): Int
 }

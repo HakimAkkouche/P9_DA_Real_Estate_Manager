@@ -9,6 +9,7 @@ import android.widget.ImageView
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.haksoftware.p9_da_real_estate_manager.R
+import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.DialogAddPhotoBinding
 
 
@@ -40,9 +41,9 @@ class AddPhotoDialog : DialogFragment() {
             binding.submitButton.setOnClickListener {
                 if(binding.editText.text.isNotEmpty() ){
                     if(selectedImageUri !=null) {
-                        val photoViewState =
-                            PhotoViewState(selectedImageUri, binding.editText.text.toString())
-                        listener.onPhotoDialogAdded(photoViewState)
+                        val photoEntity =
+                            PhotoEntity(0, selectedImageUri.toString(), binding.editText.text.toString(), 0)
+                        listener.onPhotoDialogAdded(photoEntity)
                         dialog!!.dismiss()
                     }
                 }

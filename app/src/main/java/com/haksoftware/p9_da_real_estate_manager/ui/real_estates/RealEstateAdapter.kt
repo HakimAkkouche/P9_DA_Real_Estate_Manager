@@ -12,9 +12,10 @@ import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetai
 import com.haksoftware.p9_da_real_estate_manager.databinding.EmptyItemBinding
 import com.haksoftware.p9_da_real_estate_manager.databinding.RealEstateItemBinding
 import com.haksoftware.realestatemanager.utils.Utils.formatNumberToUSStyle
+import com.haksoftware.realestatemanager.utils.Utils.isDateWithinLast7Days
 import java.io.File
-import java.text.NumberFormat
-import java.util.Locale
+import java.time.Instant
+import java.time.ZoneId
 
 class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAdapter<RealEstateWithDetails, RecyclerView.ViewHolder>(RealEstateDiffCallback()) {
 
@@ -46,20 +47,26 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
         }
     }
 
-    inner class RealEstateViewHolder( binding: RealEstateItemBinding) : RecyclerView.ViewHolder(binding.root) {
-
-        private val binding = binding
+    inner class RealEstateViewHolder(private val binding: RealEstateItemBinding) : RecyclerView.ViewHolder(binding.root) {
 
         private val imageView: ImageView = binding.realEstateThumbnail
 
-        fun bind(realEstate: RealEstateWithDetails) {
-            binding.type.text = realEstate.type.nameType
-            binding.city.text = realEstate.realEstate.city
-            binding.price.text = formatNumberToUSStyle(realEstate.realEstate.price)
-            binding.surface.text = realEstate.realEstate.squareFeet.toString()
-            binding.roomCount.text = realEstate.realEstate.roomCount.toString()
+        fun bind(realEstateWithDetails: RealEstateWithDetails) {
+            binding.type.text = realEstateWithDetails.type.nameType
+            binding.city.text = realEstateWithDetails.realEstate.city
+            binding.price.text = formatNumberToUSStyle(realEstateWithDetails.realEstate.price)
+            binding.surface.text = realEstateWithDetails.realEstate.squareFeet.toString()
+            binding.roomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
 
-            val photoPath = realEstate.photos.getOrNull(0)?.namePhoto
+            if (realEstateWithDetails.realEstate.soldDate!!.toInt() != -1) {
+                binding.currentState.setImageResource(R.drawable.ic_sold)
+            }
+            else if(isDateWithinLast7Days(realEstateWithDetails.realEstate.creationDate) ){
+                binding.currentState.setImageResource(R.drawable.ic_new)
+            }
+
+
+            val photoPath = realEstateWithDetails.photos.getOrNull(0)?.namePhoto
             if (photoPath != null) {
                 val file = File(photoPath)
                 Glide.with(imageView.context)
@@ -69,7 +76,7 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
                 imageView.setImageResource(R.drawable.home_24) // Optionnel : Image par défaut si aucune photo
             }
             itemView.setOnClickListener {
-                clickListener.onItemClick(realEstate)
+                clickListener.onItemClick(realEstateWithDetails)
             }
         }
     }

@@ -1,6 +1,7 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.addrealestate
 
 import android.app.Application
+import androidx.core.net.toUri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -40,7 +40,6 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
     private val _city = MutableLiveData<String>()
     private val _zipCode = MutableLiveData<String>()
     private val _country = MutableLiveData<String>()
-    private val _soldDate = MutableStateFlow("")
     private val _roomCount = MutableStateFlow(0)
     private val _bathroomCount = MutableStateFlow(0)
     private val _idRealtor = MutableStateFlow(0)
@@ -54,34 +53,30 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
 
     // Public StateFlows to be observed from the Fragment
     val price: StateFlow<String> = _price
-    val surface: StateFlow<String> = _surface
-    val description: StateFlow<String> = _description
     val address: LiveData<String> = _address
     val city: LiveData<String> = _city
-    val zipCode: LiveData<String> = _zipCode
-    val country: LiveData<String> = _country
-    val soldDate: StateFlow<String> = _soldDate
-    val roomCount: StateFlow<Int> = _roomCount
-    val bathroomCount: StateFlow<Int> = _bathroomCount
     val idRealtor: StateFlow<Int> = _idRealtor
     val idType: StateFlow<Int> = _idType
-    val pointsOfInterest: StateFlow<List<Int>> = _pointsOfInterest
 
-    private val _photoViewStateList = MutableStateFlow<MutableList<PhotoViewState>>(mutableListOf())
-    val photoViewStateList: StateFlow<MutableList<PhotoViewState>> get() = _photoViewStateList
+    private val _photoEntityList = MutableStateFlow<MutableList<PhotoEntity>>(mutableListOf())
+    private val photoEntityList: StateFlow<MutableList<PhotoEntity>> get() = _photoEntityList
 
     // Transform StateFlow to LiveData
-    val photoViewStateListLiveData: LiveData<List<PhotoViewState>> = _photoViewStateList
+    val photoEntityListLiveData: LiveData<List<PhotoEntity>> = _photoEntityList
         .map { it.toList() }
         .asLiveData()
-    fun addPhotoViewState(photoViewState: PhotoViewState) {
-        _photoViewStateList.update { list ->
-            list.apply { add(photoViewState) }
-        }
+    fun addPhotoEntity(photoEntity: PhotoEntity) {
+        val updatedList = _photoEntityList.value.toMutableList()
+        updatedList.add(photoEntity)
+        _photoEntityList.value = updatedList
     }
-
+    fun removePhotoEntity(photoEntity: PhotoEntity) {
+        val updatedList = _photoEntityList.value.toMutableList()
+        updatedList.remove(photoEntity)
+        _photoEntityList.value = updatedList
+    }
     // Vérifier la validité des champs texte
-    val isFormValid: StateFlow<Boolean> = combine(
+    private val isTextFormValid: StateFlow<Boolean> = combine(
         _price, _surface, _description
     ) { values: Array<String> ->
         values[0].isNotBlank() && values[1].isNotBlank() && values[2].isNotBlank()
@@ -90,14 +85,22 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
         SharingStarted.Lazily,
         false
     )
-    private val isPhotoListNotEmpty: StateFlow<Boolean> = _photoViewStateList
+    private val isPhotoListNotEmpty: StateFlow<Boolean> = _photoEntityList
         .map { it.isNotEmpty() }
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
             false
         )
-
+    val isFormValid: StateFlow<Boolean> = combine(
+        isTextFormValid, isPhotoListNotEmpty
+    ) { isTextValid: Boolean, isPhotoNotEmpty: Boolean ->
+        isTextValid && isPhotoNotEmpty
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.Lazily,
+        false
+    )
 
     fun updatePrice(price: String) {
         _price.value = price
@@ -122,11 +125,6 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
     }
     fun updateAddress(address: String) {
         _address.value = address
-    }
-
-
-    fun updateSoldDate(soldDate: String) {
-        _soldDate.value = soldDate
     }
 
     fun updateRoomCount(roomCount: Int) {
@@ -163,7 +161,7 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
                 val idRealtor = _idRealtor.value
                 val idType = _idType.value
                 val pointsOfInterest = _pointsOfInterest.value
-                val photos = photoViewStateList.value
+                val photos = photoEntityList.value
 
                 val realEstateEntity = RealEstateEntity(
                     idRealEstate = 0, // Auto-generated by Room
@@ -186,13 +184,13 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
                 val realEstateId = realEstateRepository.insertRealEstate(realEstateEntity).toInt()
 
                 // Insert photos
-                val photoEntities = photos!!.map { photo ->
+                val photoEntities = photos.map { photo ->
                     val filename = UUID.randomUUID().toString() + ".jpg"
-                    val filePath = Utils.saveImageToInternalStorage(getApplication(), photo.imageUri!!, filename)
+                    val filePath = Utils.saveImageToInternalStorage(getApplication(), photo.namePhoto.toUri(), filename)
                     PhotoEntity(
                         idPhoto = 0, // Auto-generated by Room
                         namePhoto = filePath,
-                        descriptionPhoto = photo.description,
+                        descriptionPhoto = photo.descriptionPhoto,
                         idRealEstate = realEstateId
                     )
                 }

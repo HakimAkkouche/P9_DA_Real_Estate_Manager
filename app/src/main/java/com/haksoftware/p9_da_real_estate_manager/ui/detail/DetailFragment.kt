@@ -1,6 +1,5 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.detail
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -13,25 +12,24 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
-import com.haksoftware.p9_da_real_estate_manager.BuildConfig
 import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentDetailBinding
-import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddPhotoAdapter
+import com.haksoftware.p9_da_real_estate_manager.ui.edit.GetRealEstateCallBack
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 import com.haksoftware.realestatemanager.utils.Utils.formatNumberToUSStyle
+import com.haksoftware.realestatemanager.utils.Utils.getEpochToFormattedDate
 
-class DetailFragment : Fragment(), MenuProvider {
+class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
 
     private var _binding: FragmentDetailBinding? = null
-
+    private lateinit var detailViewModel: DetailViewModel
     private lateinit var realEstateWithDetails: RealEstateWithDetails
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -47,41 +45,14 @@ class DetailFragment : Fragment(), MenuProvider {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
-        val detailViewModel = ViewModelProvider(this, viewModelFactory)[DetailViewModel::class.java]
+        detailViewModel = ViewModelProvider(this, viewModelFactory)[DetailViewModel::class.java]
 
         _binding = FragmentDetailBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        realEstateWithDetails = navigationArgs.realEstate
-        binding.textType.text = realEstateWithDetails.type.nameType
-        binding.textDescription.text = realEstateWithDetails.realEstate.descriptionRealEstate
-        binding.textPrice.text = formatNumberToUSStyle(realEstateWithDetails.realEstate.price)
-        binding.textSquareFeet.text = realEstateWithDetails.realEstate.squareFeet.toString()
-        binding.textRoomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
-        binding.textBathroomCount.text = realEstateWithDetails.realEstate.bathroomCount.toString()
-        binding.textAddress.text = realEstateWithDetails.realEstate.address
-        val zipCity = realEstateWithDetails.realEstate.postalCode + realEstateWithDetails.realEstate.city
-        binding.textPostalCodeCity.text = zipCity
-        binding.textState.text = realEstateWithDetails.realEstate.state
-        val realtorName = realEstateWithDetails.realtor.title + " " + realEstateWithDetails.realtor.lastname.uppercase() + " " +
-                realEstateWithDetails.realtor.firstname
-        binding.textRealtor.text = realtorName
-        binding.textRealtorNumber.text = realEstateWithDetails.realtor.phoneNumber
-        binding.textRealtorEmail.text = realEstateWithDetails.realtor.email
-        /*
-        binding.textCreationDate.text = realEstateWithDetails.realEstate.creationDate*/
+        detailViewModel.getRealEstateWithDetails(navigationArgs.realEstate.realEstate.idRealEstate, this)
 
-        val address = realEstateWithDetails.realEstate.address + " " +realEstateWithDetails.realEstate.city
 
-        val  mapUrl = detailViewModel.getMapUrl( address)
-        if (mapUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(detailViewModel.getMapUrl( address))
-                .into(binding.mapImageView)
-        }
-
-        setupRecyclerView()
-        initChips()
         return root
     }
     private fun setupRecyclerView() {
@@ -131,9 +102,48 @@ class DetailFragment : Fragment(), MenuProvider {
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         return when (menuItem.itemId) {
             R.id.action_edit -> {
+                val action = DetailFragmentDirections.actionNavDetailToNavEdit(realEstateWithDetails)
+                findNavController().navigate(action)
                 true
             }
             else -> false
         }
+    }
+
+    override fun onGetRealEstateReponse(realEstateWithDetails: RealEstateWithDetails) {
+        this.realEstateWithDetails = realEstateWithDetails
+        binding.textType.text = realEstateWithDetails.type.nameType
+        binding.textDescription.text = realEstateWithDetails.realEstate.descriptionRealEstate
+        binding.textPrice.text = formatNumberToUSStyle(realEstateWithDetails.realEstate.price)
+        binding.textSquareFeet.text = realEstateWithDetails.realEstate.squareFeet.toString()
+        binding.textRoomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
+        binding.textBathroomCount.text = realEstateWithDetails.realEstate.bathroomCount.toString()
+        binding.textAddress.text = realEstateWithDetails.realEstate.address
+        val zipCity = realEstateWithDetails.realEstate.postalCode + realEstateWithDetails.realEstate.city
+        binding.textPostalCodeCity.text = zipCity
+        binding.textState.text = realEstateWithDetails.realEstate.state
+        val realtorName = realEstateWithDetails.realtor.title + " " + realEstateWithDetails.realtor.lastname.uppercase() + " " +
+                realEstateWithDetails.realtor.firstname
+        binding.textRealtor.text = realtorName
+        binding.textRealtorNumber.text = realEstateWithDetails.realtor.phoneNumber
+        binding.textRealtorEmail.text = realEstateWithDetails.realtor.email
+
+        binding.textCreationDate.text = getEpochToFormattedDate(realEstateWithDetails.realEstate.creationDate)
+        if(realEstateWithDetails.realEstate.soldDate!= -1L) {
+            binding.layoutSold.visibility = View.VISIBLE
+            binding.textSoldDate.text = getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
+        }
+
+        val address = realEstateWithDetails.realEstate.address + " " +realEstateWithDetails.realEstate.city
+
+        val  mapUrl = detailViewModel.getMapUrl( address)
+        if (mapUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(detailViewModel.getMapUrl( address))
+                .into(binding.mapImageView)
+        }
+
+        setupRecyclerView()
+        initChips()
     }
 }

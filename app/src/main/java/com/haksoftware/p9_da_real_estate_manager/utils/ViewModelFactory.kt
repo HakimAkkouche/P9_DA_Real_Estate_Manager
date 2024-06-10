@@ -9,12 +9,15 @@ import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddRealEstateV
 import com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailViewModel
 import com.haksoftware.p9_da_real_estate_manager.ui.edit.EditViewModel
 import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 
 
 class ViewModelFactory private constructor(
-    private val application: Application
+    private val application: Application,
+    private val ioDispatcher: CoroutineDispatcher
 ) : ViewModelProvider.Factory {
-    private val realEstateRepository: RealEstateRepository = RealEstateRepository(application.applicationContext)
+    private val realEstateRepository: RealEstateRepository = RealEstateRepository.getInstance(application.applicationContext, ioDispatcher)
     private val mapRepository: MapRepository = MapRepository.getInstance()
 
     companion object {
@@ -24,7 +27,8 @@ class ViewModelFactory private constructor(
         fun getInstance(application: Application): ViewModelFactory {
             return instance ?: synchronized(this) {
                 instance ?: ViewModelFactory(
-                    application
+                    application,
+                    Dispatchers.IO
                 ).also { instance = it }
             }
         }
@@ -38,7 +42,7 @@ class ViewModelFactory private constructor(
             modelClass.isAssignableFrom(AddRealEstateViewModel::class.java) ->
                 AddRealEstateViewModel(application, realEstateRepository) as T
             modelClass.isAssignableFrom(DetailViewModel::class.java) ->
-                DetailViewModel(mapRepository) as T
+                DetailViewModel(realEstateRepository, mapRepository) as T
             modelClass.isAssignableFrom(EditViewModel::class.java) ->
                 EditViewModel(application, realEstateRepository) as T
             else -> throw IllegalArgumentException("Unknown ViewModel class")

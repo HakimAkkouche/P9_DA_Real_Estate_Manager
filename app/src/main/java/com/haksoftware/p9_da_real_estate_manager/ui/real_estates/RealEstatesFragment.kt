@@ -1,6 +1,7 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.real_estates
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -18,9 +19,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentRealEstatesBinding
+import com.haksoftware.p9_da_real_estate_manager.ui.search.SearchCallback
+import com.haksoftware.p9_da_real_estate_manager.ui.search.SearchDialogFragment
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 
-class RealEstatesFragment : Fragment(), MenuProvider, OnItemClickListener {
+class RealEstatesFragment : Fragment(), MenuProvider, OnItemClickListener, SearchCallback {
 
     private var _binding: FragmentRealEstatesBinding? = null
 
@@ -34,6 +37,8 @@ class RealEstatesFragment : Fragment(), MenuProvider, OnItemClickListener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val menuHost: MenuHost = requireActivity()
+        menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
         realEstatesViewModel = ViewModelProvider(this, viewModelFactory)[RealEstatesViewModel::class.java]
 
@@ -57,13 +62,22 @@ class RealEstatesFragment : Fragment(), MenuProvider, OnItemClickListener {
         realEstatesViewModel.realEstates.observe(viewLifecycleOwner) { realEstates ->
             realEstateAdapter.submitList(realEstates)
         }
+        realEstatesViewModel.searchResults.observe(viewLifecycleOwner) {searchResults ->
+            realEstateAdapter.submitList(searchResults)
+
+            searchResults?.let {
+                Log.d("RealEstatesFragment", "searchResults updated: ${it.size} items")
+            } ?: run {
+                Log.d("RealEstatesFragment", "searchResults is null")
+            }
+        }
     }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
-    override fun onItemClick(realEstate: RealEstateWithDetails) {
-        findNavController().navigate(RealEstatesFragmentDirections.actionNavRealEstatesToNavDetail(realEstate))
+    override fun onItemClick(realEstateWithDetails: RealEstateWithDetails) {
+        findNavController().navigate(RealEstatesFragmentDirections.actionNavRealEstatesToNavDetail(realEstateWithDetails))
     }
 
     /**
@@ -91,7 +105,15 @@ class RealEstatesFragment : Fragment(), MenuProvider, OnItemClickListener {
                 navController?.navigate(R.id.nav_add)
                 true
             }
+            R.id.action_search -> {
+                val dialog = SearchDialogFragment(this)
+                dialog.show(this.parentFragmentManager, "AdvancedSearchDialog")
+                true
+            }
             else -> false
         }
+    }
+    override fun onSearchResultCallback(result: List<RealEstateWithDetails>) {
+        realEstateAdapter.submitList(result)
     }
 }

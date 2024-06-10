@@ -2,6 +2,8 @@ package com.haksoftware.realestatemanager.utils
 
 import android.content.Context
 import android.net.Uri
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -9,7 +11,9 @@ import java.io.InputStream
 import java.net.InetAddress
 import java.text.NumberFormat
 import java.time.LocalDateTime
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -37,6 +41,10 @@ object Utils {
     fun getTodayDate(): String {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
     }
+    fun getEpochToFormattedDate(dateLong: Long) : String {
+        return LocalDateTime.ofEpochSecond(dateLong,0, ZoneOffset.UTC).format(
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+    }
 
     /**
      * Vérification de la connexion réseau
@@ -44,12 +52,14 @@ object Utils {
      * @param context Contexte de l'application
      * @return Boolean indiquant si la connexion Internet est disponible
      */
-    fun isInternetAvailable(): Boolean {
-        return try {
-            val address: InetAddress = InetAddress.getByName("www.google.com")
-            !address.equals("")
-        } catch (e: IOException) {
-            false
+    suspend fun isInternetAvailable(): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val address: InetAddress = InetAddress.getByName("www.google.com")
+                !address.equals("")
+            } catch (e: IOException) {
+                false
+            }
         }
     }/*
     fun isInternetAvailable(context: Context): Boolean {
@@ -73,5 +83,14 @@ object Utils {
     fun formatNumberToUSStyle(number: Int): String {
         val numberFormat = NumberFormat.getNumberInstance(Locale.US)
         return "$" + numberFormat.format(number)
+    }
+    fun isDateWithinLast7Days(timestamp: Long): Boolean {
+        val dateTime = LocalDateTime.ofEpochSecond(timestamp,0, ZoneOffset.UTC)
+
+        val now = LocalDateTime.now()
+
+        val daysDifference = ChronoUnit.DAYS.between(dateTime, now)
+
+        return daysDifference < 7
     }
 }

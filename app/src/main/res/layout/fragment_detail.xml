@@ -7,7 +7,7 @@
     android:padding="8dp">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:padding="8dp"
         android:orientation="vertical">
 
@@ -19,6 +19,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:textSize="18sp"
                 android:text="@string/media"
                 />
 
@@ -28,15 +30,64 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp" />
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/text_price"
-            android:layout_width="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawablePadding="8dp"
-            tools:text="1 000 000 $"
-            android:layout_columnWeight="1"
-            app:drawableLeftCompat="@drawable/ic_money_dollar" />
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp">
+            <TextView
+                android:id="@+id/text_price"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:drawablePadding="8dp"
+                android:textSize="18sp"
+                tools:text="1 000 000 $"
+                android:layout_columnWeight="1"
+                app:drawableLeftCompat="@drawable/ic_money_dollar" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                android:textSize="18sp"
+                app:layout_constraintEnd_toStartOf="@+id/text_creation_date"
+                android:text="@string/published"/>
+            <TextView
+                android:id="@+id/text_creation_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:textSize="18sp"
+                tools:text="01/12/2024"
+                android:layout_columnWeight="1"/>
+            <LinearLayout
+                android:id="@+id/layout_sold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/text_creation_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/text_creation_date"
+                    android:textColor="@color/quantum_googred"
+                    android:text="@string/sold_"/>
+                <TextView
+                    android:id="@+id/text_sold_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="18sp"
+                    tools:text="01/12/2024"
+                    android:textColor="@color/quantum_googred"
+                    android:layout_columnWeight="1"/>
+            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -48,7 +99,7 @@
                 android:layout_marginBottom="8dp"
                 android:text="@string/description"
                 android:textStyle="bold"
-                android:textSize="16sp" />
+                android:textSize="18sp" />
             <TextView
                 android:id="@+id/text_description"
                 android:layout_width="wrap_content"
@@ -58,7 +109,6 @@
                 tools:text="@string/lorem_ipsum_1_paragraph"/>
         </LinearLayout>
         <TableLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:stretchColumns="1">
@@ -162,7 +212,8 @@
                     android:layout_span="2"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginStart="16dp" />
+                    android:layout_marginStart="16dp"
+                    android:contentDescription="@string/map"/>
             </TableRow>
             <TableRow
                 android:padding="5dp">
