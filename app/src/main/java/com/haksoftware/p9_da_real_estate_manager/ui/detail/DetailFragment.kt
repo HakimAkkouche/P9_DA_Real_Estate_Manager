@@ -129,7 +129,7 @@ class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
         binding.textRealtorEmail.text = realEstateWithDetails.realtor.email
 
         binding.textCreationDate.text = getEpochToFormattedDate(realEstateWithDetails.realEstate.creationDate)
-        if(realEstateWithDetails.realEstate.soldDate!= -1L) {
+        if(realEstateWithDetails.realEstate.soldDate!= null) {
             binding.layoutSold.visibility = View.VISIBLE
             binding.textSoldDate.text = getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
         }

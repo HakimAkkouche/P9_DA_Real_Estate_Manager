@@ -175,7 +175,7 @@ class AddRealEstateViewModel(application: Application, private val realEstateRep
                     city = city!!,
                     state = state!!,
                     creationDate = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC),
-                    soldDate = -1,
+                    soldDate = null,
                     idRealtor = idRealtor,
                     idType = idType
                 )

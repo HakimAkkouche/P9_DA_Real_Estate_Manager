@@ -119,19 +119,10 @@ class EditViewModel(application: Application,
                     Log.d("updateRealEstate", "Inserting photos")
                     realEstateRepository.insertPhotos(photoEntities)
                 }
-                if (_photosToRemoveEntityList.value.isNotEmpty()) {
-                    Log.d("updateRealEstate", "Deleting photos")
-                    _photosToRemoveEntityList.value.forEach {
-                        realEstateRepository.deletePhoto(
-                            it
-                        )
-                    }
-                }
-
 
             }
             catch(e: IOException) {
-                Log.d("updatePhotos", "create photo entity ${e.message}")
+                Log.d("Error", "add photo entity ${e.message}")
             }
 
         }
@@ -152,7 +143,7 @@ class EditViewModel(application: Application,
 
             }
             catch(e: IOException) {
-                Log.d("updatePhotos", "create photo entity ${e.message}")
+                Log.d("Error", "remove photo entity ${e.message}")
             }
 
         }
@@ -160,26 +151,33 @@ class EditViewModel(application: Application,
     fun updateISNextTo() {
 
         viewModelScope.launch {
-            // Handle points of interest updates
-            val isNextToEntities = _pointsOfInterest.value.map { poiId ->
-                IsNextToEntity(
-                    idRealEstate = _realEstateWithDetailsOriginal.value!!.realEstate.idRealEstate,
-                    idPoi = poiId
-                )
-            }
-
-            if (isNextToEntities.isNotEmpty()) {
-                withContext(Dispatchers.IO) {
-                    if (_realEstateWithDetailsOriginal.value!!.pointsOfInterest.isNotEmpty()) {
-                        Log.d("updateRealEstate", "Clearing POIs before update")
-                        realEstateRepository.clearPOIsBeforeUpdate(_realEstateWithDetailsOriginal.value!!.realEstate.idRealEstate)
-                    }
-                    Log.d("updateRealEstate", "Inserting new POIs")
-                    realEstateRepository.insertIsNextToEntities(isNextToEntities)
-
-                    Log.d("updateRealEstate", "Inserted new POIs")
+            try {
+                // Handle points of interest updates
+                val isNextToEntities = _pointsOfInterest.value.map { poiId ->
+                    IsNextToEntity(
+                        idRealEstate = _realEstateWithDetailsOriginal.value!!.realEstate.idRealEstate,
+                        idPoi = poiId
+                    )
                 }
+                if (isNextToEntities.isNotEmpty()) {
+                    withContext(Dispatchers.IO) {
+                        if (_realEstateWithDetailsOriginal.value!!.pointsOfInterest.isNotEmpty()) {
+                            Log.d("updateRealEstate", "Clearing POIs before update")
+                            realEstateRepository.clearPOIsBeforeUpdate(
+                                _realEstateWithDetailsOriginal.value!!.realEstate.idRealEstate
+                            )
+                        }
+                        Log.d("updateRealEstate", "Inserting new POIs")
+                        realEstateRepository.insertIsNextToEntities(isNextToEntities)
+
+                        Log.d("updateRealEstate", "Inserted new POIs")
+                    }
+                }
+                _updateSuccess.postValue(true)
+            } catch (e: IOException) {
+                _updateSuccess.postValue(false)
             }
+
         }
     }
 }

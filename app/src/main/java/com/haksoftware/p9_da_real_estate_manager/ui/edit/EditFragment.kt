@@ -87,29 +87,29 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
         }
         placesClient = Places.createClient(requireContext())
 
-        binding.editDescription.text = realEstateWithDetails.realEstate.descriptionRealEstate.toEditable()
-        binding.editPrice.text = realEstateWithDetails.realEstate.price.toString().toEditable()
-        binding.textviewPriceInEuro.text = Utils.convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat()).toString()
-        binding.editSurface.text = realEstateWithDetails.realEstate.squareFeet.toString().toEditable()
-        binding.textviewSurfaceInM2.text = Utils.convertFtSquareToMSquare(realEstateWithDetails.realEstate.squareFeet.toFloat()).toString()
+        binding.editDescription.setText(realEstateWithDetails.realEstate.descriptionRealEstate)
+        binding.editPrice.setText( realEstateWithDetails.realEstate.price.toString())
+        binding.textviewPriceInEuro.setText(Utils.convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat()).toString())
+        binding.editSurface.setText( realEstateWithDetails.realEstate.squareFeet.toString())
+        binding.textviewSurfaceInM2.setText(Utils.convertFtSquareToMSquare(realEstateWithDetails.realEstate.squareFeet.toFloat()).toString())
         roomCount = realEstateWithDetails.realEstate.roomCount
-        binding.editTextRoomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
+        binding.editTextRoomCount.setText( realEstateWithDetails.realEstate.roomCount.toString())
         bathroomCount = realEstateWithDetails.realEstate.bathroomCount
-        binding.editTextBathroomCount.text = realEstateWithDetails.realEstate.bathroomCount.toString()
+        binding.editTextBathroomCount.setText(realEstateWithDetails.realEstate.bathroomCount.toString())
 
         val address = realEstateWithDetails.realEstate.address + "," + realEstateWithDetails.realEstate.city
         binding.autocompleteAddress.setText(address, false)
 
-        binding.editAddress.text = realEstateWithDetails.realEstate.address.toEditable()
-        binding.editPostalCode.text = realEstateWithDetails.realEstate.postalCode.toEditable()
-        binding.editCity.text = realEstateWithDetails.realEstate.city.toEditable()
-        binding.editCountry.text = realEstateWithDetails.realEstate.state.toEditable()
+        binding.editAddress.setText(realEstateWithDetails.realEstate.address)
+        binding.editPostalCode.setText(realEstateWithDetails.realEstate.postalCode)
+        binding.editCity.setText(realEstateWithDetails.realEstate.city)
+        binding.editCountry.setText(realEstateWithDetails.realEstate.state)
 
         binding.editSoldDate.visibility = View.VISIBLE
-        binding.editSoldDate.text = if (realEstateWithDetails.realEstate.soldDate!!.toLong() != -1L)
+        binding.editSoldDate.setText(if (realEstateWithDetails.realEstate.soldDate != null)
         {
-            getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!).toEditable()
-        }   else("".toEditable())
+            getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
+        }   else(""))
 
         setupRecyclerView()
         initRealtor()
@@ -443,7 +443,6 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
     private fun enableSubmitButton() {
         binding.buttonSubmit.isEnabled = true
     }
-    private fun String.toEditable(): Editable = Editable.Factory.getInstance().newEditable(this)
     override fun onPhotoDialogAdded(photoEntity: PhotoEntity) {
         viewModel.addPhotoEntity(photoEntity)
         adapterPhotos.addPhoto(photoEntity)

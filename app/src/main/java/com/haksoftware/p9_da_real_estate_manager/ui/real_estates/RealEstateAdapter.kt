@@ -14,8 +14,6 @@ import com.haksoftware.p9_da_real_estate_manager.databinding.RealEstateItemBindi
 import com.haksoftware.realestatemanager.utils.Utils.formatNumberToUSStyle
 import com.haksoftware.realestatemanager.utils.Utils.isDateWithinLast7Days
 import java.io.File
-import java.time.Instant
-import java.time.ZoneId
 
 class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAdapter<RealEstateWithDetails, RecyclerView.ViewHolder>(RealEstateDiffCallback()) {
 
@@ -58,7 +56,7 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
             binding.surface.text = realEstateWithDetails.realEstate.squareFeet.toString()
             binding.roomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
 
-            if (realEstateWithDetails.realEstate.soldDate!!.toInt() != -1) {
+            if (realEstateWithDetails.realEstate.soldDate != null) {
                 binding.currentState.setImageResource(R.drawable.ic_sold)
             }
             else if(isDateWithinLast7Days(realEstateWithDetails.realEstate.creationDate) ){

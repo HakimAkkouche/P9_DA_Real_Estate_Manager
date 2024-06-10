@@ -53,5 +53,4 @@ data class IsNextToEntity(
             return arrayOfNulls(size)
         }
     }
-
 }

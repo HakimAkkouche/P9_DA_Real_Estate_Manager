@@ -5,8 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
-import androidx.viewpager.widget.ViewPager
-import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentImageSliderDialogBinding
 
@@ -16,7 +14,7 @@ class ImageSliderDialogFragment(private val photoList: List<PhotoEntity>, privat
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentImageSliderDialogBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -26,7 +24,7 @@ class ImageSliderDialogFragment(private val photoList: List<PhotoEntity>, privat
 
         val viewPager = binding.viewPager
 
-        val adapter = ImageViewPagerAdapter(requireContext(), photoList)
+        val adapter = ImageViewPagerAdapter(photoList)
         viewPager.adapter = adapter
         viewPager.currentItem = startPosition
 
