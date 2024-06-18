@@ -25,8 +25,9 @@ object Utils {
      * @param dollars Montant en dollars à convertir en euros
      * @return Montant converti en euros
      */
-    fun convertDollarToEuro(dollars: Float): Int {
-        return (dollars * euroValue).roundToInt()
+    fun convertDollarToEuro(dollars: Float): String {
+        val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
+        return numberFormat.format((dollars * euroValue).roundToInt()) + " €"
     }
 
     fun convertFtSquareToMSquare(surface: Float): Int {
@@ -49,7 +50,7 @@ object Utils {
     /**
      * Vérification de la connexion réseau
      * NOTE : NE PAS SUPPRIMER, A MONTRER DURANT LA SOUTENANCE
-     * @param context Contexte de l'application
+     * //@param context Contexte de l'application
      * @return Boolean indiquant si la connexion Internet est disponible
      */
     suspend fun isInternetAvailable(): Boolean {

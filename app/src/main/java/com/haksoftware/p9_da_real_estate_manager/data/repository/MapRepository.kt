@@ -14,6 +14,6 @@ class MapRepository {
         }
     }
     fun getMapUrl(address: String): String {
-        return "https://maps.googleapis.com/maps/api/staticmap?center=$address&zoom=17&size=600x400&key=${BuildConfig.GOOGLE_MAPS_API_KEY}"
+        return "https://maps.googleapis.com/maps/api/staticmap?center=$address&zoom=17&size=1200x800&key=${BuildConfig.GOOGLE_MAPS_API_KEY}"
     }
 }

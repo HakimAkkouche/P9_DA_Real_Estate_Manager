@@ -6,8 +6,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.haksoftware.p9_da_real_estate_manager.data.repository.MapRepository
 import com.haksoftware.p9_da_real_estate_manager.data.repository.RealEstateRepository
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddRealEstateViewModel
-import com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailViewModel
-import com.haksoftware.p9_da_real_estate_manager.ui.edit.EditViewModel
+import com.haksoftware.p9_da_real_estate_manager.ui.loan_simulator.LoanSimulatorViewModel
 import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +14,7 @@ import kotlinx.coroutines.Dispatchers
 
 class ViewModelFactory private constructor(
     private val application: Application,
-    private val ioDispatcher: CoroutineDispatcher
+    ioDispatcher: CoroutineDispatcher
 ) : ViewModelProvider.Factory {
     private val realEstateRepository: RealEstateRepository = RealEstateRepository.getInstance(application.applicationContext, ioDispatcher)
     private val mapRepository: MapRepository = MapRepository.getInstance()
@@ -38,13 +37,11 @@ class ViewModelFactory private constructor(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(RealEstatesViewModel::class.java) ->
-                RealEstatesViewModel(application, realEstateRepository) as T
+                RealEstatesViewModel(application, realEstateRepository, mapRepository) as T
             modelClass.isAssignableFrom(AddRealEstateViewModel::class.java) ->
                 AddRealEstateViewModel(application, realEstateRepository) as T
-            modelClass.isAssignableFrom(DetailViewModel::class.java) ->
-                DetailViewModel(realEstateRepository, mapRepository) as T
-            modelClass.isAssignableFrom(EditViewModel::class.java) ->
-                EditViewModel(application, realEstateRepository) as T
+            modelClass.isAssignableFrom(LoanSimulatorViewModel::class.java) ->
+                LoanSimulatorViewModel(application) as T
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }
     }

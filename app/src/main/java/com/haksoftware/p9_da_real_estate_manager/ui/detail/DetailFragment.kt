@@ -13,28 +13,36 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.chip.Chip
 import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails
+import com.haksoftware.p9_da_real_estate_manager.databinding.EmptyDetailBinding
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentDetailBinding
-import com.haksoftware.p9_da_real_estate_manager.ui.edit.GetRealEstateCallBack
+import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstateInteractionListener
+import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesFragmentDirections
+import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
+import com.haksoftware.realestatemanager.utils.Utils.convertDollarToEuro
 import com.haksoftware.realestatemanager.utils.Utils.formatNumberToUSStyle
 import com.haksoftware.realestatemanager.utils.Utils.getEpochToFormattedDate
+import com.haksoftware.realestatemanager.utils.Utils.isInternetAvailable
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
-class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
+class DetailFragment : Fragment(), MenuProvider {
 
     private var _binding: FragmentDetailBinding? = null
-    private lateinit var detailViewModel: DetailViewModel
+    private lateinit var realEstatesViewModel: RealEstatesViewModel
     private lateinit var realEstateWithDetails: RealEstateWithDetails
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    private val navigationArgs: DetailFragmentArgs by navArgs()
+    private var isRealEstateLoaded: Boolean = false
+    private var interactionListener: RealEstateInteractionListener? = null
 
 
     override fun onCreateView(
@@ -45,16 +53,34 @@ class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
         val menuHost: MenuHost = requireActivity()
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
         val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
-        detailViewModel = ViewModelProvider(this, viewModelFactory)[DetailViewModel::class.java]
+        realEstatesViewModel = ViewModelProvider(requireActivity(), viewModelFactory)[RealEstatesViewModel::class.java]
 
-        _binding = FragmentDetailBinding.inflate(inflater, container, false)
-        val root: View = binding.root
-
-        detailViewModel.getRealEstateWithDetails(navigationArgs.realEstate.realEstate.idRealEstate, this)
-
-
-        return root
+        return if(isRealEstateLoaded)
+            FragmentDetailBinding.inflate(inflater, container, false).root
+        else
+            EmptyDetailBinding.inflate(inflater, container, false).root
     }
+
+    /**
+     * Called immediately after [.onCreateView]
+     * has returned, but before any saved state has been restored in to the view.
+     * This gives subclasses a chance to initialize themselves once
+     * they know their view hierarchy has been completely created.  The fragment's
+     * view hierarchy is not however attached to its parent at this point.
+     * @param view The View returned by [.onCreateView].
+     * @param savedInstanceState If non-null, this fragment is being re-constructed
+     * from a previous saved state as given here.
+     */
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if(isRealEstateLoaded) {
+            _binding = FragmentDetailBinding.bind(view)
+            realEstatesViewModel.currentRealEstate.observe(this.viewLifecycleOwner) {
+                bindRealEstate(it)
+            }
+        }
+    }
+
     private fun setupRecyclerView() {
         val recyclerViewPhotos: RecyclerView = binding.photoGallery
         val layoutManager = LinearLayoutManager(requireContext())
@@ -74,7 +100,6 @@ class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
             chip.isCheckable = false
             chipGroup.addView(chip)
         }
-
     }
     override fun onDestroyView() {
         super.onDestroyView()
@@ -84,12 +109,11 @@ class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
     /**
      * Called by the [MenuHost] to allow the [MenuProvider]
      * to inflate [MenuItem]s into the menu.
-     *
      * @param menu         the menu to inflate the new menu items into
      * @param menuInflater the inflater to be used to inflate the updated menu
      */
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
-        menuInflater.inflate(R.menu.fragment_edit_menu, menu)
+
     }
 
     /**
@@ -102,19 +126,24 @@ class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         return when (menuItem.itemId) {
             R.id.action_edit -> {
-                val action = DetailFragmentDirections.actionNavDetailToNavEdit(realEstateWithDetails)
-                findNavController().navigate(action)
+                if (isRealEstateLoaded) {
+                    val action =
+                        RealEstatesFragmentDirections.actionNavRealEstatesToNavEdit(realEstateWithDetails.realEstate.idRealEstate)
+                    findNavController().navigate(action)
+                }
                 true
             }
             else -> false
         }
     }
 
-    override fun onGetRealEstateReponse(realEstateWithDetails: RealEstateWithDetails) {
+    fun bindRealEstate(realEstateWithDetails: RealEstateWithDetails) {
         this.realEstateWithDetails = realEstateWithDetails
+        isRealEstateLoaded = true
         binding.textType.text = realEstateWithDetails.type.nameType
         binding.textDescription.text = realEstateWithDetails.realEstate.descriptionRealEstate
         binding.textPrice.text = formatNumberToUSStyle(realEstateWithDetails.realEstate.price)
+        binding.textPriceEuro.text = convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat())
         binding.textSquareFeet.text = realEstateWithDetails.realEstate.squareFeet.toString()
         binding.textRoomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
         binding.textBathroomCount.text = realEstateWithDetails.realEstate.bathroomCount.toString()
@@ -135,15 +164,23 @@ class DetailFragment : Fragment(), MenuProvider, GetRealEstateCallBack {
         }
 
         val address = realEstateWithDetails.realEstate.address + " " +realEstateWithDetails.realEstate.city
-
-        val  mapUrl = detailViewModel.getMapUrl( address)
-        if (mapUrl.isNotEmpty()) {
-            Glide.with(this)
-                .load(detailViewModel.getMapUrl( address))
-                .into(binding.mapImageView)
+        var mapUrl: String
+        CoroutineScope(Dispatchers.Main).launch {
+            if (isInternetAvailable()) {
+                mapUrl = realEstatesViewModel.getMapUrl(address)
+                if (mapUrl.isNotEmpty()) {
+                    Glide.with(requireContext())
+                        .load(realEstatesViewModel.getMapUrl(address))
+                        .into(binding.mapImageView)
+                }
+            }
         }
 
         setupRecyclerView()
         initChips()
+    }
+    override fun onDetach() {
+        super.onDetach()
+        interactionListener = null
     }
 }

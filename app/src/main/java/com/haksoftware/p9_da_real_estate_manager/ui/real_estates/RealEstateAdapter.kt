@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.google.android.material.card.MaterialCardView
 import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails
 import com.haksoftware.p9_da_real_estate_manager.databinding.EmptyItemBinding
@@ -15,11 +16,26 @@ import com.haksoftware.realestatemanager.utils.Utils.formatNumberToUSStyle
 import com.haksoftware.realestatemanager.utils.Utils.isDateWithinLast7Days
 import java.io.File
 
-class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAdapter<RealEstateWithDetails, RecyclerView.ViewHolder>(RealEstateDiffCallback()) {
+
+class RealEstateAdapter(private val onItemClicked: (RealEstateWithDetails) -> Unit) :
+    ListAdapter<RealEstateWithDetails, RecyclerView.ViewHolder>(RealEstateDiffCallback) {
+
+        private var listItemView: MutableList<MaterialCardView> = arrayListOf()
 
     companion object {
         private const val VIEW_TYPE_EMPTY = 0
         private const val VIEW_TYPE_ITEM = 1
+
+        private val RealEstateDiffCallback = object : DiffUtil.ItemCallback<RealEstateWithDetails>() {
+            override fun areItemsTheSame(oldItem: RealEstateWithDetails, newItem: RealEstateWithDetails): Boolean {
+                return (oldItem.realEstate.idRealEstate == newItem.realEstate.idRealEstate
+                        )
+            }
+
+            override fun areContentsTheSame(oldItem: RealEstateWithDetails, newItem: RealEstateWithDetails): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 
     override fun getItemViewType(position: Int): Int {
@@ -39,6 +55,16 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is RealEstateViewHolder) {
             val realEstate = getItem(position)
+           listItemView.add(holder.itemView as MaterialCardView)
+            holder.itemView.setOnClickListener {
+                /* for (itemView in listItemView) {
+                    (itemView).setCardBackgroundColor(itemView.context.getResources().getColor(R.color.white))
+
+                }
+                (holder.itemView as MaterialCardView).setCardBackgroundColor(
+                    holder.itemView.context.resources.getColor(R.color.green_500))*/
+                onItemClicked(realEstate)
+            }
             holder.bind(realEstate)
         } else if (holder is EmptyViewHolder) {
             holder.bind()
@@ -63,7 +89,6 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
                 binding.currentState.setImageResource(R.drawable.ic_new)
             }
 
-
             val photoPath = realEstateWithDetails.photos.getOrNull(0)?.namePhoto
             if (photoPath != null) {
                 val file = File(photoPath)
@@ -72,9 +97,6 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
                     .into(imageView)
             } else {
                 imageView.setImageResource(R.drawable.home_24) // Optionnel : Image par défaut si aucune photo
-            }
-            itemView.setOnClickListener {
-                clickListener.onItemClick(realEstateWithDetails)
             }
         }
     }
@@ -85,13 +107,4 @@ class RealEstateAdapter(private val clickListener: OnItemClickListener) : ListAd
         }
     }
 
-    class RealEstateDiffCallback : DiffUtil.ItemCallback<RealEstateWithDetails>() {
-        override fun areItemsTheSame(oldItem: RealEstateWithDetails, newItem: RealEstateWithDetails): Boolean {
-            return oldItem.realEstate.idRealEstate == newItem.realEstate.idRealEstate
-        }
-
-        override fun areContentsTheSame(oldItem: RealEstateWithDetails, newItem: RealEstateWithDetails): Boolean {
-            return oldItem == newItem
-        }
-    }
 }

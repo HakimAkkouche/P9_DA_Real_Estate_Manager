@@ -56,7 +56,6 @@ android {
 }
 
 dependencies {
-    var ktor_version = "2.3.11"
     implementation("androidx.room:room-common:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     implementation("androidx.room:room-runtime:2.6.1")
@@ -96,6 +95,19 @@ dependencies {
     //navigation components
     implementation("androidx.navigation:navigation-fragment-ktx:2.7.7")
     implementation("androidx.navigation:navigation-ui-ktx:2.7.7")
+
+    // Feature module Support
+    implementation("androidx.navigation:navigation-dynamic-features-fragment:2.7.7")
+
+    //Feature to show two fragments side to side
+    implementation("androidx.slidingpanelayout:slidingpanelayout:1.2.0")
+
+    //Custom NumberPicker by travijuu
+    implementation("com.github.travijuu:numberpicker:1.0.7")
+
+    // Testing Navigation
+    androidTestImplementation("androidx.navigation:navigation-testing:2.7.7")
+
 
     testImplementation("org.mockito:mockito-core:3.12.4")
 

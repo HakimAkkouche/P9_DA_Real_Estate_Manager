@@ -36,7 +36,7 @@ import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddPhotoDialog
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.RealtorAdapter
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.RemovePhotoListener
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.TypeAdapter
-import com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailFragmentArgs
+import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 import com.haksoftware.realestatemanager.utils.Utils
 import com.haksoftware.realestatemanager.utils.Utils.getEpochToFormattedDate
@@ -49,9 +49,9 @@ import java.util.Calendar
 import java.util.Locale
 
 
-class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
+class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, RemovePhotoListener {
 
-    private lateinit var viewModel: EditViewModel
+    private lateinit var viewModel: RealEstatesViewModel
     private lateinit var adapterPhotos: AddPhotoAdapter
     private var _binding: FragmentAddRealEstateBinding? = null
 
@@ -60,86 +60,26 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
     private val binding get() = _binding!!
     private lateinit var placesClient: PlacesClient
     private lateinit var addressAutoCompleteAdapter: ArrayAdapter<String>
-    private var roomCount = 0
-    private var bathroomCount = 0
     private var initSpinnerCount = 0
 
     private lateinit var realEstateWithDetails: RealEstateWithDetails
-    private val navigationArgs: DetailFragmentArgs by navArgs()
+    private val navigationArgs: EditFragmentArgs by navArgs()
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
-        viewModel = ViewModelProvider(this, viewModelFactory)[EditViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[RealEstatesViewModel::class.java]
         _binding = FragmentAddRealEstateBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        realEstateWithDetails = navigationArgs.realEstate
+        viewModel.getRealEstateWithDetails(
+            navigationArgs.realEstateId,
+            this
+        )
 
-        viewModel.setRealEstateWithDetails(realEstateWithDetails.realEstate.idRealEstate)
-
-
-        // Initialize the Places API with the API key
-        if (!Places.isInitialized()) {
-            Places.initialize(requireContext(), BuildConfig.GOOGLE_MAPS_API_KEY)
-        }
-        placesClient = Places.createClient(requireContext())
-
-        binding.editDescription.setText(realEstateWithDetails.realEstate.descriptionRealEstate)
-        binding.editPrice.setText( realEstateWithDetails.realEstate.price.toString())
-        binding.textviewPriceInEuro.setText(Utils.convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat()).toString())
-        binding.editSurface.setText( realEstateWithDetails.realEstate.squareFeet.toString())
-        binding.textviewSurfaceInM2.setText(Utils.convertFtSquareToMSquare(realEstateWithDetails.realEstate.squareFeet.toFloat()).toString())
-        roomCount = realEstateWithDetails.realEstate.roomCount
-        binding.editTextRoomCount.setText( realEstateWithDetails.realEstate.roomCount.toString())
-        bathroomCount = realEstateWithDetails.realEstate.bathroomCount
-        binding.editTextBathroomCount.setText(realEstateWithDetails.realEstate.bathroomCount.toString())
-
-        val address = realEstateWithDetails.realEstate.address + "," + realEstateWithDetails.realEstate.city
-        binding.autocompleteAddress.setText(address, false)
-
-        binding.editAddress.setText(realEstateWithDetails.realEstate.address)
-        binding.editPostalCode.setText(realEstateWithDetails.realEstate.postalCode)
-        binding.editCity.setText(realEstateWithDetails.realEstate.city)
-        binding.editCountry.setText(realEstateWithDetails.realEstate.state)
-
-        binding.editSoldDate.visibility = View.VISIBLE
-        binding.editSoldDate.setText(if (realEstateWithDetails.realEstate.soldDate != null)
-        {
-            getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
-        }   else(""))
-
-        setupRecyclerView()
-        initRealtor()
-        initTypes()
-        initChips()
-        setupDatePicker()
-        setupObservers()
-
-        addTextWatchers()
-        addSpinnerListeners()
-
-        binding.btnAddImage.setOnClickListener {
-            val dialog = AddPhotoDialog()
-            dialog.setListener(this)
-            dialog.show(parentFragmentManager, "AddPhotoDialog")
-        }
-        CoroutineScope(Dispatchers.Main).launch {
-            if(Utils.isInternetAvailable()) {
-                setupAutoCompleteTextView()
-            }
-        }
-
-
-        binding.buttonSubmit.setOnClickListener {
-            viewModel.updateRealEstate()
-            viewModel.updateISNextTo()
-            viewModel.addPhotos()
-            viewModel.removePhotos()
-            findNavController().popBackStack()
-        }
 
         return root
     }
@@ -298,6 +238,71 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
             }
         }
     }
+
+    override fun onGetRealEstateResponse(realEstateWithDetails: RealEstateWithDetails) {
+        this.realEstateWithDetails = realEstateWithDetails
+
+        viewModel.setRealEstateWithDetails(realEstateWithDetails.realEstate.idRealEstate)
+
+
+        // Initialize the Places API with the API key
+        if (!Places.isInitialized()) {
+            Places.initialize(requireContext(), BuildConfig.GOOGLE_MAPS_API_KEY)
+        }
+        placesClient = Places.createClient(requireContext())
+
+        binding.editDescription.setText(realEstateWithDetails.realEstate.descriptionRealEstate)
+        binding.editPrice.setText( realEstateWithDetails.realEstate.price.toString())
+        binding.textviewPriceInEuro.text = Utils.convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat())
+        binding.editSurface.setText( realEstateWithDetails.realEstate.squareFeet.toString())
+        binding.textviewSurfaceInM2.text = Utils.convertFtSquareToMSquare(realEstateWithDetails.realEstate.squareFeet.toFloat()).toString()
+        binding.numberPickerRoomCount.value = realEstateWithDetails.realEstate.roomCount
+        binding.numberPickerBathroomCount.value = realEstateWithDetails.realEstate.bathroomCount
+
+        val address = realEstateWithDetails.realEstate.address + "," + realEstateWithDetails.realEstate.city
+        binding.autocompleteAddress.setText(address, false)
+
+        binding.editAddress.setText(realEstateWithDetails.realEstate.address)
+        binding.editPostalCode.setText(realEstateWithDetails.realEstate.postalCode)
+        binding.editCity.setText(realEstateWithDetails.realEstate.city)
+        binding.editCountry.setText(realEstateWithDetails.realEstate.state)
+
+        binding.editSoldDate.visibility = View.VISIBLE
+        binding.editSoldDate.setText(if (realEstateWithDetails.realEstate.soldDate != null)
+        {
+            getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
+        }   else(""))
+
+        setupRecyclerView()
+        initRealtor()
+        initTypes()
+        initChips()
+        setupDatePicker()
+        setupObservers()
+
+        addTextWatchers()
+        addSpinnerListeners()
+
+        binding.btnAddImage.setOnClickListener {
+            val dialog = AddPhotoDialog()
+            dialog.setListener(this)
+            dialog.show(parentFragmentManager, "AddPhotoDialog")
+        }
+        CoroutineScope(Dispatchers.Main).launch {
+            if(Utils.isInternetAvailable()) {
+                setupAutoCompleteTextView()
+            }
+        }
+
+
+        binding.buttonSubmit.setOnClickListener {
+            viewModel.updateRealEstate()
+            viewModel.updateISNextTo()
+            viewModel.addPhotos()
+            viewModel.removePhotos()
+            findNavController().popBackStack()
+        }
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
@@ -340,44 +345,16 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
             realEstateWithDetails.realEstate.state = text
             viewModel.updateRealEstateWithDetails(realEstateWithDetails)
         })
-
-        binding.buttonIncrementRoomCount.setOnClickListener {
-            roomCount += 1
-            binding.editTextRoomCount.text = roomCount.toString()
-
+        binding.numberPickerRoomCount.setValueChangedListener { roomCount, _ ->
             realEstateWithDetails.realEstate.roomCount = roomCount
             viewModel.updateRealEstateWithDetails(realEstateWithDetails)
             enableSubmitButton()
         }
 
-        binding.buttonDecrementRoomCount.setOnClickListener {
-            if (roomCount > 0) {
-                roomCount -= 1
-                binding.editTextRoomCount.text = roomCount.toString()
-
-                realEstateWithDetails.realEstate.roomCount = roomCount
-                viewModel.updateRealEstateWithDetails(realEstateWithDetails)
-                enableSubmitButton()
-            }
-        }
-
-        binding.buttonIncrementBathroomCount.setOnClickListener {
-            bathroomCount += 1
-            binding.editTextBathroomCount.text = bathroomCount.toString()
-
+        binding.numberPickerBathroomCount.setValueChangedListener { bathroomCount, _ ->
             realEstateWithDetails.realEstate.bathroomCount = bathroomCount
             viewModel.updateRealEstateWithDetails(realEstateWithDetails)
             enableSubmitButton()
-        }
-
-        binding.buttonDecrementBathroomCount.setOnClickListener {
-            if (bathroomCount > 0) {
-                bathroomCount -= 1
-                binding.editTextBathroomCount.text = bathroomCount.toString()
-                realEstateWithDetails.realEstate.bathroomCount = bathroomCount
-                viewModel.updateRealEstateWithDetails(realEstateWithDetails)
-                enableSubmitButton()
-            }
         }
     }
 
@@ -419,7 +396,6 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
                     enableSubmitButton()
                 } else initSpinnerCount++
             }
-
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
 
@@ -436,7 +412,6 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
                     initSpinnerCount++
                 }
             }
-
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
@@ -454,5 +429,4 @@ class EditFragment : Fragment(), AddPhotoDialogListener, RemovePhotoListener {
         adapterPhotos.removePhoto(photoEntity)
         enableSubmitButton()
     }
-
 }
