@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/nav_real_estates">
-
     <fragment
         android:id="@+id/nav_real_estates"
         android:name="com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesFragment"
@@ -15,7 +14,15 @@
             android:id="@+id/action_nav_real_estates_to_nav_detail"
             app:destination="@id/nav_detail">
         </action>
+        <action
+            android:id="@+id/action_nav_real_estates_to_nav_edit"
+            app:destination="@id/nav_edit">
+            <argument
+                android:name="realEstateId"
+                app:argType="integer"/>
+        </action>
     </fragment>
+
 
     <fragment
         android:id="@+id/nav_detail"
@@ -25,10 +32,10 @@
         <action
             android:id="@+id/action_nav_detail_to_nav_edit"
             app:destination="@id/nav_edit">
+            <argument
+                android:name="realEstateId"
+                app:argType="integer"/>
         </action>
-        <argument
-            android:name="realEstate"
-            app:argType="com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails" />
     </fragment>
     <fragment
         android:id="@+id/nav_add"
@@ -39,14 +46,18 @@
             android:id="@+id/action_nav_add_to_nav_real_estates"
             app:destination="@id/nav_real_estates" />
     </fragment>
-
     <fragment
         android:id="@+id/nav_edit"
         android:name="com.haksoftware.p9_da_real_estate_manager.ui.edit.EditFragment"
         android:label="@string/menu_edit"
         tools:layout="@layout/fragment_add_real_estate">
         <argument
-            android:name="realEstate"
-            app:argType="com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails" />
+            android:name="realEstateId"
+            app:argType="integer"/>
     </fragment>
+    <fragment
+        android:id="@+id/nav_loan"
+        android:name="com.haksoftware.p9_da_real_estate_manager.ui.loan_simulator.LoanSimulatorFragment"
+        android:label="@string/loan_simulator"
+        tools:layout="@layout/fragment_loan_simulator" />
 </navigation>

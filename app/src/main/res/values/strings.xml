@@ -151,5 +151,11 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="search">Search</string>
-    <string name="_0">0</string>
+    <string name="zero">0</string>
+    <string name="loan_simulator">Loan simulator</string>
+    <string name="amount_needed">Amount needed</string>
+    <string name="duration_in_years">Duration in years</string>
+    <string name="taux_d_interet">Taux d\'intérêt</string>
+    <string name="launch_simulation">Launch simulation</string>
+    <string name="take_photo">Take Photo</string>
 </resources>

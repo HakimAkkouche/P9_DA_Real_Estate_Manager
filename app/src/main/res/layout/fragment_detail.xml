@@ -43,21 +43,31 @@
                 app:layout_constraintStart_toStartOf="parent"
                 android:drawablePadding="8dp"
                 android:textSize="18sp"
-                tools:text="1 000 000 $"
-                android:layout_columnWeight="1"
-                app:drawableLeftCompat="@drawable/ic_money_dollar" />
+                tools:text="$1,000,000"
+                android:layout_columnWeight="1"/>
             <TextView
+                android:id="@+id/text_price_euro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/text_price"
+                app:layout_constraintStart_toStartOf="parent"
+                android:drawablePadding="8dp"
+                android:textSize="18sp"
+                tools:text="1 000 000 €"
+                android:layout_columnWeight="1"/>
+            <TextView
+                android:id="@+id/text_label_published"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:layout_constraintTop_toTopOf="parent"
                 android:textSize="18sp"
-                app:layout_constraintEnd_toStartOf="@+id/text_creation_date"
+                app:layout_constraintEnd_toEndOf="@+id/text_creation_date"
                 android:text="@string/published"/>
             <TextView
                 android:id="@+id/text_creation_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/text_label_published"
                 app:layout_constraintEnd_toEndOf="parent"
                 android:textSize="18sp"
                 tools:text="01/12/2024"
@@ -172,7 +182,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:layout_span="2">
-
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -208,7 +217,7 @@
                 <ImageView
                     android:id="@+id/mapImageView"
                     android:layout_width="0dp"
-                    android:layout_height="200dp"
+                    android:layout_height="wrap_content"
                     android:layout_span="2"
                     android:layout_marginTop="16dp"
                     android:layout_marginEnd="16dp"

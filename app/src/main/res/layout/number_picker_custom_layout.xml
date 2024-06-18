@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="144dp"
+    android:layout_height="48dp"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:padding="0dp"
+        android:id="@+id/decrement"
+        android:textStyle="bold"
+        android:text="@string/minus_sign"/>
+    <EditText
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:text="@string/zero"
+        android:textColor="@android:color/black"
+        android:inputType="number"
+        android:id="@+id/display"
+        android:gravity="center"
+        android:autofillHints="@string/zero"
+        android:hint="@string/zero"
+        />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:layout_width="48dp"
+        android:layout_height="match_parent"
+        android:padding="0dp"
+        android:textSize="25sp"
+        android:id="@+id/increment"
+        android:text="@string/plus_sign"
+        style="@style/Theme.P9_DA_Real_Estate_Manager"/>
+
+</LinearLayout>

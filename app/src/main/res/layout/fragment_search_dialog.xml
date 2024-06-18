@@ -226,7 +226,7 @@
                     android:id="@+id/editText_room_count"
                     android:layout_width="48dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/_0"
+                    android:text="@string/zero"
                     android:focusable="false"
                     android:gravity="center_horizontal"/>
                 <Button
@@ -261,7 +261,7 @@
                     android:id="@+id/editText_bathroom_count"
                     android:layout_width="48dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/_0"
+                    android:text="@string/zero"
                     android:layout_gravity="center"
                     android:focusable="false"
                     android:gravity="center_horizontal"/>
@@ -297,7 +297,7 @@
                     android:id="@+id/editText_photos_count"
                     android:layout_width="48dp"
                     android:layout_height="wrap_content"
-                    android:text="@string/_0"
+                    android:text="@string/zero"
                     android:layout_gravity="center"
                     android:focusable="false"
                     android:gravity="center_horizontal"/>

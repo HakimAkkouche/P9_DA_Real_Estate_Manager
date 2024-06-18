@@ -42,8 +42,7 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
     private val binding get() = _binding!!
     private lateinit var placesClient: PlacesClient
     private lateinit var addressAutoCompleteAdapter: ArrayAdapter<String>
-    private var roomCount = 0
-    private var bathroomCount = 0
+
     private lateinit var adapterPhotos: AddPhotoAdapter
 
     override fun onCreateView(
@@ -53,10 +52,8 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
         val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
         viewModel = ViewModelProvider(this, viewModelFactory)[AddRealEstateViewModel::class.java]
         _binding = FragmentAddRealEstateBinding.inflate(inflater, container, false)
-        binding.editTextRoomCount.text = roomCount.toString()
-        binding.editTextBathroomCount.text = bathroomCount.toString()
-        viewModel.updateRoomCount(roomCount)
-        viewModel.updateBathroomCount(bathroomCount)
+        binding.numberPickerRoomCount.value = 0
+        binding.numberPickerBathroomCount.value = 0
 
         // Initialize the Places API with the API key
         if (!Places.isInitialized()) {
@@ -223,34 +220,11 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
         binding.editCity.addTextChangedListener(createTextWatcher { viewModel.updateCity(it) })
         binding.editCountry.addTextChangedListener(createTextWatcher { viewModel.updateCountry(it) })
 
-        binding.buttonIncrementRoomCount.setOnClickListener {
-            roomCount += 1
-            binding.editTextRoomCount.text = roomCount.toString()
+        binding.numberPickerRoomCount.setValueChangedListener { roomCount, action ->
             viewModel.updateRoomCount(roomCount)
-
         }
-
-        binding.buttonDecrementRoomCount.setOnClickListener {
-            if (roomCount > 0) {
-                roomCount -= 1
-                binding.editTextRoomCount.text = roomCount.toString()
-                viewModel.updateRoomCount(roomCount)
-            }
-        }
-
-        // Gestion des boutons plus et moins pour le pickerBathroomCount
-        binding.buttonIncrementBathroomCount.setOnClickListener {
-            bathroomCount += 1
-            binding.editTextBathroomCount.text = bathroomCount.toString()
+        binding.numberPickerBathroomCount.setValueChangedListener { bathroomCount, action ->
             viewModel.updateBathroomCount(bathroomCount)
-        }
-
-        binding.buttonDecrementBathroomCount.setOnClickListener {
-            if (bathroomCount > 0) {
-                bathroomCount -= 1
-                binding.editTextBathroomCount.text = bathroomCount.toString()
-                viewModel.updateBathroomCount(bathroomCount)
-            }
         }
 
         binding.spinnerRealtor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -283,7 +257,7 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
         } catch (e: NumberFormatException) {
             0.0
         }
-        binding.textviewPriceInEuro.text = String.format("%d €", priceInEuro)
+        binding.textviewPriceInEuro.text = priceInEuro.toString()
     }
 
     private fun updateSurfaceInM2(surface: String) {
@@ -316,5 +290,4 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
         viewModel.removePhotoEntity(photoEntity)
         adapterPhotos.removePhoto(photoEntity)
     }
-
 }

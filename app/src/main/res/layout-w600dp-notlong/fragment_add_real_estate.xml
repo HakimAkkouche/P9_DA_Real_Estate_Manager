@@ -20,7 +20,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:src="@drawable/ic_add_24"
-                android:contentDescription="@string/select_image"
+                android:contentDescription="@string/add_a_picture"
                 android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"/>
             <TextView
@@ -45,14 +45,15 @@
             android:paddingTop="8dp"
             android:orientation="horizontal"
             >
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/realtor" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/realtor" />
             <Spinner
                 android:id="@+id/spinner_realtor"
                 android:layout_width="match_parent"
-                android:layout_height="48dp"/>
+                android:layout_height="48dp"
+                android:padding="5dp"/>
         </LinearLayout>
         <LinearLayout
             android:id="@+id/layout_spinner_type"
@@ -76,14 +77,14 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:minWidth="370dp"
-            android:rowCount="4"
-            android:columnCount="2"
+            android:rowCount="2"
+            android:columnCount="4"
             android:layout_marginBottom="8dp"
             android:layout_weight="1"
             android:verticalSpacing="5dp">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_layout_price"
-                android:layout_width="wrap_content"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 app:errorEnabled="true"
                 android:layout_row="0"
@@ -111,7 +112,7 @@
                 android:text="@string/euro_sign" />
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/input_layout_surface"
-                android:layout_width="wrap_content"
+                android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 app:errorEnabled="true"
@@ -146,8 +147,8 @@
                 android:layout_gravity="center"
                 android:textAlignment="center"
                 android:text="@string/room_count"
-                android:layout_row="2"
-                android:layout_column="0"
+                android:layout_row="0"
+                android:layout_column="2"
                 android:layout_columnWeight="1"/>
             <com.travijuu.numberpicker.library.NumberPicker
                 android:id="@+id/number_picker_room_count"
@@ -155,9 +156,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_row="3"
-                android:layout_column="0"
-                android:layout_columnWeight="1"
+                android:layout_row="1"
+                android:layout_column="2"
+                android:layout_columnWeight="2"
                 numberpicker:custom_layout="@layout/number_picker_custom_layout"/>
             <TextView
                 android:id="@+id/textview_bathroom_count"
@@ -166,8 +167,8 @@
                 android:layout_gravity="center"
                 android:textAlignment="center"
                 android:text="@string/bathroom_count"
-                android:layout_row="2"
-                android:layout_column="1"
+                android:layout_row="0"
+                android:layout_column="3"
                 android:layout_columnWeight="1"/>
             <com.travijuu.numberpicker.library.NumberPicker
                 android:id="@+id/number_picker_bathroom_count"
@@ -175,8 +176,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:layout_row="3"
-                android:layout_column="1"
+                android:layout_row="1"
+                android:layout_column="3"
                 android:layout_columnWeight="1"
                 numberpicker:custom_layout="@layout/number_picker_custom_layout"/>
         </GridLayout>
