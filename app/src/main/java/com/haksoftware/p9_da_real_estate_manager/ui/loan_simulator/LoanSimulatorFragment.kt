@@ -10,24 +10,28 @@ import android.view.ViewGroup
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentLoanSimulatorBinding
+import com.haksoftware.p9_da_real_estate_manager.ui.viewmodel.LoanSimulatorViewModel
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 import kotlinx.coroutines.launch
 
-
+/**
+ * Fragment to simulate loan calculations.
+ */
 class LoanSimulatorFragment : Fragment() {
 
     private lateinit var binding: FragmentLoanSimulatorBinding
-
     private lateinit var viewModel: LoanSimulatorViewModel
+
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         binding = FragmentLoanSimulatorBinding.inflate(inflater, container, false)
         val viewModelFactory = ViewModelFactory.getInstance(requireActivity().application)
         viewModel = ViewModelProvider(this, viewModelFactory)[LoanSimulatorViewModel::class.java]
-
 
         setupTextWatchers()
         setupObservers()
@@ -38,6 +42,9 @@ class LoanSimulatorFragment : Fragment() {
         return binding.root
     }
 
+    /**
+     * Sets up observers for the LiveData and StateFlow objects in the ViewModel.
+     */
     private fun setupObservers() {
         lifecycleScope.launch {
             viewModel.isFormValid.collect { isValid ->
@@ -64,24 +71,30 @@ class LoanSimulatorFragment : Fragment() {
         }
     }
 
+    /**
+     * Sets up TextWatchers for the EditText fields to update the ViewModel.
+     */
     private fun setupTextWatchers() {
-
         binding.edittextLoanAmount.addTextChangedListener(createTextWatcher {
-            if(it.isNotEmpty()){
+            if (it.isNotEmpty()) {
                 viewModel.updateLoanAmount(it.toDouble())
             }
         })
         binding.edittextLoanDuration.addTextChangedListener(createTextWatcher {
-            if(it.isNotEmpty() ) {
+            if (it.isNotEmpty()) {
                 viewModel.updateLoanDuration(it.toDouble())
             }
         })
         binding.edittextInterestRate.addTextChangedListener(createTextWatcher {
-            if(it.isNotEmpty()&& it != ",") {
+            if (it.isNotEmpty() && it != ",") {
                 viewModel.updateInterestRate(it.toDouble())
             }
         })
     }
+
+    /**
+     * Creates a TextWatcher to handle text changes and update the ViewModel.
+     */
     private fun createTextWatcher(update: (String) -> Unit): TextWatcher {
         return object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

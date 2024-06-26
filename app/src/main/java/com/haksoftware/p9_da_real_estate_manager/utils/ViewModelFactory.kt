@@ -3,20 +3,30 @@ package com.haksoftware.p9_da_real_estate_manager.utils
 import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.haksoftware.p9_da_real_estate_manager.data.manager.RealEstateManagerDatabase
 import com.haksoftware.p9_da_real_estate_manager.data.repository.MapRepository
 import com.haksoftware.p9_da_real_estate_manager.data.repository.RealEstateRepository
-import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddRealEstateViewModel
-import com.haksoftware.p9_da_real_estate_manager.ui.loan_simulator.LoanSimulatorViewModel
-import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
+import com.haksoftware.p9_da_real_estate_manager.ui.viewmodel.AddRealEstateViewModel
+import com.haksoftware.p9_da_real_estate_manager.ui.viewmodel.LoanSimulatorViewModel
+import com.haksoftware.p9_da_real_estate_manager.ui.viewmodel.RealEstatesViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 
 
 class ViewModelFactory private constructor(
-    private val application: Application,
+    val application: Application,
     ioDispatcher: CoroutineDispatcher
 ) : ViewModelProvider.Factory {
-    private val realEstateRepository: RealEstateRepository = RealEstateRepository.getInstance(application.applicationContext, ioDispatcher)
+
+    private val db = RealEstateManagerDatabase.getDatabase(application.applicationContext)
+    private val realEstateRepository: RealEstateRepository = RealEstateRepository.getInstance(
+        db.realEstateDao(),
+        db.pointOfInterestDao(),
+        db.realtorDao(),
+        db.typeDao(),
+        db.photoDao(),
+        db.isNextToDao(),
+        ioDispatcher)
     private val mapRepository: MapRepository = MapRepository.getInstance()
 
     companion object {
@@ -37,11 +47,11 @@ class ViewModelFactory private constructor(
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(RealEstatesViewModel::class.java) ->
-                RealEstatesViewModel(application, realEstateRepository, mapRepository) as T
+                RealEstatesViewModel(realEstateRepository, mapRepository) as T
             modelClass.isAssignableFrom(AddRealEstateViewModel::class.java) ->
-                AddRealEstateViewModel(application, realEstateRepository) as T
+                AddRealEstateViewModel(realEstateRepository) as T
             modelClass.isAssignableFrom(LoanSimulatorViewModel::class.java) ->
-                LoanSimulatorViewModel(application) as T
+                LoanSimulatorViewModel() as T
             else -> throw IllegalArgumentException("Unknown ViewModel class")
         }
     }

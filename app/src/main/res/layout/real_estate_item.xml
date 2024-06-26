@@ -84,6 +84,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             tools:text="Room count"
+            android:drawablePadding="8dp"
+            app:drawableLeftCompat="@drawable/ic_room"
             app:layout_constraintTop_toBottomOf="@+id/surface"
             app:layout_constraintLeft_toRightOf="@id/city"
             app:layout_constraintEnd_toEndOf="parent"

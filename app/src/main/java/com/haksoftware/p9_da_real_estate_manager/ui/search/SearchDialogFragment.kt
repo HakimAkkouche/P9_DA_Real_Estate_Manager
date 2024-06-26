@@ -14,19 +14,21 @@ import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.TypeEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.FragmentSearchDialogBinding
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.TypeAdapter
-import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
+import com.haksoftware.p9_da_real_estate_manager.ui.viewmodel.RealEstatesViewModel
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 import com.haksoftware.realestatemanager.utils.Utils
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.Calendar
-
+/**
+ * DialogFragment for searching real estate properties.
+ * @property searchCallBack Callback for search results.
+ */
 class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogFragment() {
 
     private lateinit var binding: FragmentSearchDialogBinding
-
     private lateinit var viewModel: RealEstatesViewModel
-    private val pOI: MutableList<Int> = mutableListOf<Int>()
+    private val pOI: MutableList<Int> = mutableListOf()
     private var fromDate: Long? = null
     private var toDate: Long? = null
     private var roomCount: Int? = null
@@ -34,6 +36,9 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
     private var minPhotoCount: Int? = null
     private var typeId: Int = 0
 
+    /**
+     * Inflates the layout for the fragment and initializes ViewModel and UI components.
+     */
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -51,7 +56,7 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
             val minSurface = binding.editSurfaceMin.text.toString().toIntOrNull()
             val maxSurface = binding.editSurfaceMax.text.toString().toIntOrNull()
             val minPrice = binding.editPriceMin.text.toString().toIntOrNull()
-            val maxPrice = binding.editPricemax.text.toString().toIntOrNull()
+            val maxPrice = binding.editPriceMax.text.toString().toIntOrNull()
             val isSold = binding.checkedIsSold.isChecked
 
             viewModel.searchRealEstates(searchCallBack, typeId, fromDate, toDate, minSurface, maxSurface,
@@ -66,7 +71,10 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
         return binding.root
     }
 
-    private fun initTypes(){
+    /**
+     * Initializes the type spinner with data from the ViewModel.
+     */
+    private fun initTypes() {
         viewModel.typesLiveData.observe(viewLifecycleOwner) { typeList ->
             val modifiedTypeList = mutableListOf(TypeEntity(0, "")) // Assuming TypeEntity has a constructor that accepts idType and a name
             modifiedTypeList.addAll(typeList)
@@ -81,11 +89,15 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
     }
-    private fun initChips(){
+
+    /**
+     * Initializes the ChipGroup with data from the ViewModel.
+     */
+    private fun initChips() {
         viewModel.pOILiveData.observe(viewLifecycleOwner) { poiList ->
             val chipGroup = binding.chipGroupPointOfInterest
             chipGroup.removeAllViews()  // Clear any existing chips
-            for (pOI in poiList){
+            for (pOI in poiList) {
                 val chip = Chip(chipGroup.context)
                 chip.text = pOI.namePoi
                 chip.isCheckable = true
@@ -93,7 +105,7 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
                 chipGroup.addView(chip)
             }
         }
-        binding.chipGroupPointOfInterest.setOnCheckedStateChangeListener {  group, _ ->
+        binding.chipGroupPointOfInterest.setOnCheckedStateChangeListener { group, _ ->
             val checkedIds = group.checkedChipIds.map { id ->
                 group.findViewById<Chip>(id).tag as Int
             }
@@ -101,47 +113,55 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
             pOI.addAll(checkedIds)
         }
     }
+
+    /**
+     * Initializes the number pickers for room count, bathroom count, and photo count.
+     */
     private fun initNumberPickers() {
 
         binding.buttonIncrementRoomCount.setOnClickListener {
-            roomCount = if(roomCount == null ) { 1} else { roomCount!! + 1}
+            roomCount = if (roomCount == null) { 1 } else { roomCount!! + 1 }
             binding.editTextRoomCount.text = roomCount.toString()
         }
 
         binding.buttonDecrementRoomCount.setOnClickListener {
-            roomCount = if(roomCount == null ) { 0} else { roomCount!!}
+            roomCount = if (roomCount == null) { 0 } else { roomCount!! }
             if (roomCount!! > 0) {
                 roomCount = roomCount!! - 1
             }
             binding.editTextRoomCount.text = roomCount.toString()
-
         }
 
         binding.buttonIncrementBathroomCount.setOnClickListener {
-            bathroomCount = if(bathroomCount == null ) { 1} else { bathroomCount!! + 1}
+            bathroomCount = if (bathroomCount == null) { 1 } else { bathroomCount!! + 1 }
             binding.editTextBathroomCount.text = bathroomCount.toString()
         }
 
         binding.buttonDecrementBathroomCount.setOnClickListener {
-            bathroomCount = if(bathroomCount == null ) { 0} else { bathroomCount!! }
+            bathroomCount = if (bathroomCount == null) { 0 } else { bathroomCount!! }
             if (bathroomCount!! > 0) {
                 bathroomCount = bathroomCount!! - 1
             }
             binding.editTextBathroomCount.text = bathroomCount.toString()
         }
+
         binding.buttonIncrementPhotosCount.setOnClickListener {
-            minPhotoCount = if(minPhotoCount == null ) { 1} else { minPhotoCount!! + 1}
+            minPhotoCount = if (minPhotoCount == null) { 1 } else { minPhotoCount!! + 1 }
             binding.editTextPhotosCount.text = minPhotoCount.toString()
         }
 
         binding.buttonDecrementPhotosCount.setOnClickListener {
-            bathroomCount = if(minPhotoCount == null ) { 0} else { minPhotoCount!! }
+            minPhotoCount = if (minPhotoCount == null) { 0 } else { minPhotoCount!! }
             if (minPhotoCount!! > 0) {
                 minPhotoCount = minPhotoCount!! - 1
             }
             binding.editTextPhotosCount.text = minPhotoCount.toString()
         }
     }
+
+    /**
+     * Sets up the date picker for the from and to date fields.
+     */
     private fun setupDatePicker() {
         binding.editTextFromDate.setOnClickListener {
             showDatePickerDialog(it as EditText)
@@ -150,6 +170,11 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
             showDatePickerDialog(it as EditText)
         }
     }
+
+    /**
+     * Shows a date picker dialog for the specified EditText.
+     * @param editText The EditText to set the date on.
+     */
     private fun showDatePickerDialog(editText: EditText) {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
@@ -161,24 +186,16 @@ class SearchDialogFragment(private val searchCallBack: SearchCallback) : DialogF
                 editText.setText(
                     Utils.getEpochToFormattedDate(
                         LocalDateTime.of(selectedYear, selectedMonth + 1, selectedDay, 0, 0, 0)
-                            .toEpochSecond(
-                                ZoneOffset.UTC
-                            )
+                            .toEpochSecond(ZoneOffset.UTC)
                     )
                 )
 
-                if(editText.id == R.id.editTextFromDate) {
-
+                if (editText.id == R.id.editTextFromDate) {
                     fromDate = LocalDateTime.of(selectedYear, selectedMonth + 1, selectedDay, 0, 0, 0)
-                        .toEpochSecond(
-                            ZoneOffset.UTC
-                        )
-                }
-                else {
+                        .toEpochSecond(ZoneOffset.UTC)
+                } else {
                     toDate = LocalDateTime.of(selectedYear, selectedMonth + 1, selectedDay, 0, 0, 0)
-                        .toEpochSecond(
-                            ZoneOffset.UTC
-                        )
+                        .toEpochSecond(ZoneOffset.UTC)
                 }
             }, year, month, day)
         datePickerDialog.show()

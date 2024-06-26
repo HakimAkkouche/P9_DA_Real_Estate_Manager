@@ -1,15 +1,13 @@
 package com.haksoftware.p9_da_real_estate_manager.ui.addrealestate
 
 import android.Manifest
-import android.app.Activity
 import android.app.Dialog
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.provider.MediaStore
 import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
@@ -23,13 +21,11 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-
+/**
+ * DialogFragment for adding photos. Allows the user to take a photo with the camera
+ * or select an image from the gallery, and add a description to the photo.
+ */
 class AddPhotoDialog : DialogFragment() {
-
-    private val PICK_IMAGE_CODE = 101
-    private val TAKE_PHOTO_CODE = 102
-    private val PERMISSIONS_REQUEST_CODE = 103
 
     private lateinit var listener: AddPhotoDialogListener
     private var selectedImageUri: Uri? = null
@@ -38,9 +34,51 @@ class AddPhotoDialog : DialogFragment() {
     private val binding get() = _binding!!
     private lateinit var currentPhotoPath: String
 
+    // Launcher for requesting multiple permissions
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            when {
+                permissions[Manifest.permission.READ_EXTERNAL_STORAGE] == true -> {
+                    imagePickerIntent()
+                }
+                permissions[Manifest.permission.CAMERA] == true && permissions[Manifest.permission.WRITE_EXTERNAL_STORAGE] == true -> {
+                    takePhotoIntent()
+                }
+                else -> {
+                    // Handle the case where permissions are not granted
+                }
+            }
+        }
+
+    // Launcher for picking an image from the gallery
+    private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            imageView.setImageURI(selectedImageUri)
+        }
+    }
+
+    // Launcher for taking a photo with the camera
+    private val takePhotoLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success: Boolean ->
+        if (success) {
+            val file = File(currentPhotoPath)
+            selectedImageUri = Uri.fromFile(file)
+            imageView.setImageURI(selectedImageUri)
+        }
+    }
+
+    /**
+     * Sets the listener for the dialog.
+     *
+     * @param listener The listener to handle photo addition events.
+     */
     fun setListener(listener: AddPhotoDialogListener) {
         this.listener = listener
     }
+
+    /**
+     * Creates and returns the dialog for adding photos.
+     */
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val builder = AlertDialog.Builder(it)
@@ -56,12 +94,12 @@ class AddPhotoDialog : DialogFragment() {
                 checkPermissionsAndOpenCamera()
             }
             binding.cancelButton.setOnClickListener { dialog!!.dismiss() }
-            binding.submitButton.setOnClickListener {
-                if (binding.editText.text.isNotEmpty()) {
+            binding.submitButtonPhoto.setOnClickListener {
+                if (binding.editDescPhoto.text.isNotEmpty()) {
                     if (selectedImageUri != null) {
                         val photoEntity = PhotoEntity(
                             0, selectedImageUri.toString(),
-                            binding.editText.text.toString(), 0
+                            binding.editDescPhoto.text.toString(), 0
                         )
                         listener.onPhotoDialogAdded(photoEntity)
                         dialog!!.dismiss()
@@ -74,58 +112,75 @@ class AddPhotoDialog : DialogFragment() {
         } ?: throw IllegalStateException("Activity cannot be null")
     }
 
+    /**
+     * Checks if the required permissions are granted and opens the gallery if they are.
+     */
     private fun checkPermissionsAndOpenGallery() {
         val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
         if (arePermissionsGranted(permissions)) {
             imagePickerIntent()
         } else {
-            requestPermissions(permissions, PERMISSIONS_REQUEST_CODE)
+            requestPermissionLauncher.launch(permissions)
         }
     }
 
+    /**
+     * Checks if the required permissions are granted and opens the camera if they are.
+     */
     private fun checkPermissionsAndOpenCamera() {
         val permissions = arrayOf(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (arePermissionsGranted(permissions)) {
             takePhotoIntent()
         } else {
-            requestPermissions(permissions, PERMISSIONS_REQUEST_CODE)
+            requestPermissionLauncher.launch(permissions)
         }
     }
 
+    /**
+     * Checks if all the specified permissions are granted.
+     *
+     * @param permissions The permissions to check.
+     * @return True if all permissions are granted, false otherwise.
+     */
     private fun arePermissionsGranted(permissions: Array<String>): Boolean {
         return permissions.all {
             ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
         }
     }
 
+    /**
+     * Launches an intent to pick an image from the gallery.
+     */
     private fun imagePickerIntent() {
-        val intent = Intent()
-        intent.type = "image/*"
-        intent.action = Intent.ACTION_GET_CONTENT
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), PICK_IMAGE_CODE)
+        pickImageLauncher.launch("image/*")
     }
 
+    /**
+     * Launches an intent to take a photo with the camera.
+     */
     private fun takePhotoIntent() {
-        val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        takePictureIntent.resolveActivity(requireActivity().packageManager)?.also {
-            val photoFile: File? = try {
-                createImageFile()
-            } catch (ex: IOException) {
-                // Error occurred while creating the File
-                null
-            }
-            photoFile?.also {
-                val photoURI: Uri = FileProvider.getUriForFile(
-                    requireContext(),
-                    BuildConfig.APPLICATION_ID + ".fileprovider", // Use BuildConfig.APPLICATION_ID
-                    it
-                )
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                startActivityForResult(takePictureIntent, TAKE_PHOTO_CODE)
-            }
+        val photoFile: File? = try {
+            createImageFile()
+        } catch (ex: IOException) {
+            // Error occurred while creating the File
+            null
+        }
+        photoFile?.also {
+            val photoURI: Uri = FileProvider.getUriForFile(
+                requireContext(),
+                BuildConfig.APPLICATION_ID + ".fileprovider", // Use BuildConfig.APPLICATION_ID
+                it
+            )
+            takePhotoLauncher.launch(photoURI)
         }
     }
 
+    /**
+     * Creates an image file to store the photo taken with the camera.
+     *
+     * @return The created image file.
+     * @throws IOException If an error occurs while creating the file.
+     */
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
@@ -138,40 +193,6 @@ class AddPhotoDialog : DialogFragment() {
         ).apply {
             // Save a file: path for use with ACTION_VIEW intents
             currentPhotoPath = absolutePath
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (resultCode == Activity.RESULT_OK) {
-            when (requestCode) {
-                PICK_IMAGE_CODE -> {
-                    selectedImageUri = data?.data
-                    imageView.setImageURI(selectedImageUri)
-                }
-                TAKE_PHOTO_CODE -> {
-                    val file = File(currentPhotoPath)
-                    selectedImageUri = Uri.fromFile(file)
-                    imageView.setImageURI(selectedImageUri)
-                }
-            }
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<out String>, grantResults: IntArray
-    ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        if (requestCode == PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
-                if (permissions.contains(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                    imagePickerIntent()
-                } else if (permissions.contains(Manifest.permission.CAMERA)) {
-                    takePhotoIntent()
-                }
-            } else {
-                // Permissions were denied, handle accordingly
-            }
         }
     }
 }

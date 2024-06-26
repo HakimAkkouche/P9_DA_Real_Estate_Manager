@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PointOfInterestEntity
+
 @Dao
 interface PointOfInterestDao {
     @Transaction

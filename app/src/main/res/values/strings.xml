@@ -158,4 +158,5 @@
     <string name="taux_d_interet">Taux d\'intérêt</string>
     <string name="launch_simulation">Launch simulation</string>
     <string name="take_photo">Take Photo</string>
+    <string name="add_a_picture_btn">Add a picture action</string>
 </resources>

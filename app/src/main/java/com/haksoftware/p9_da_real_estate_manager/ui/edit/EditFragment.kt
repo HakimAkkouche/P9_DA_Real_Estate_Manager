@@ -36,7 +36,7 @@ import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.AddPhotoDialog
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.RealtorAdapter
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.RemovePhotoListener
 import com.haksoftware.p9_da_real_estate_manager.ui.addrealestate.TypeAdapter
-import com.haksoftware.p9_da_real_estate_manager.ui.real_estates.RealEstatesViewModel
+import com.haksoftware.p9_da_real_estate_manager.ui.viewmodel.RealEstatesViewModel
 import com.haksoftware.p9_da_real_estate_manager.utils.ViewModelFactory
 import com.haksoftware.realestatemanager.utils.Utils
 import com.haksoftware.realestatemanager.utils.Utils.getEpochToFormattedDate
@@ -48,15 +48,16 @@ import java.time.ZoneOffset
 import java.util.Calendar
 import java.util.Locale
 
-
+/**
+ * Fragment for editing real estate details.
+ */
 class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, RemovePhotoListener {
 
     private lateinit var viewModel: RealEstatesViewModel
     private lateinit var adapterPhotos: AddPhotoAdapter
     private var _binding: FragmentAddRealEstateBinding? = null
 
-    // This property is only valid between onCreateView and
-    // onDestroyView.
+    // This property is only valid between onCreateView and onDestroyView.
     private val binding get() = _binding!!
     private lateinit var placesClient: PlacesClient
     private lateinit var addressAutoCompleteAdapter: ArrayAdapter<String>
@@ -65,6 +66,9 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
     private lateinit var realEstateWithDetails: RealEstateWithDetails
     private val navigationArgs: EditFragmentArgs by navArgs()
 
+    /**
+     * Called to have the fragment instantiate its user interface view.
+     */
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -83,6 +87,10 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
 
         return root
     }
+
+    /**
+     * Sets up the RecyclerView for displaying photos.
+     */
     @SuppressLint("NotifyDataSetChanged")
     private fun setupRecyclerView() {
         val recyclerViewPhotos: RecyclerView = binding.photoGallery
@@ -97,6 +105,10 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
         }
         adapterPhotos.notifyDataSetChanged()
     }
+
+    /**
+     * Initializes the Realtor spinner with data.
+     */
     private fun initRealtor() {
         viewModel.realtorLiveData.observe(viewLifecycleOwner) { realtorList ->
             val adapter = RealtorAdapter(requireContext(), realtorList)
@@ -109,6 +121,9 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
         }
     }
 
+    /**
+     * Initializes the Type spinner with data.
+     */
     private fun initTypes() {
         viewModel.typesLiveData.observe(viewLifecycleOwner) { typeList ->
             val adapter = TypeAdapter(requireContext(), typeList)
@@ -121,6 +136,11 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             }
         }
     }
+
+    /**
+     * Sets up the AutoCompleteTextView for address input.
+     */
+    @Suppress("DEPRECATION")
     private fun setupAutoCompleteTextView() {
         addressAutoCompleteAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line)
         binding.inputLayoutAddressAutocomplete.visibility = View.VISIBLE
@@ -153,7 +173,7 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             }
         })
 
-        binding.autocompleteAddress.setOnItemClickListener { parent, view, position, id ->
+        binding.autocompleteAddress.setOnItemClickListener { _, _, position, _ ->
             val selectedAddress = addressAutoCompleteAdapter.getItem(position)
             binding.autocompleteAddress.setText(selectedAddress)
 
@@ -181,6 +201,10 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             }
         }
     }
+
+    /**
+     * Initializes the ChipGroup with points of interest.
+     */
     private fun initChips(){
         viewModel.pOILiveData.observe(viewLifecycleOwner) { poiList ->
             val chipGroup = binding.chipGroupPointOfInterest
@@ -206,11 +230,18 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             enableSubmitButton()
         }
     }
+    /**
+     * Sets up the DatePicker for the sold date field.
+     */
     private fun setupDatePicker() {
         binding.editSoldDate.setOnClickListener {
             showDatePickerDialog()
         }
     }
+
+    /**
+     * Shows the DatePickerDialog for selecting a date.
+     */
     private fun showDatePickerDialog() {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
@@ -228,6 +259,9 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             }, year, month, day)
         datePickerDialog.show()
     }
+    /**
+     * Sets up observers for ViewModel data changes.
+     */
     private fun setupObservers() {
         viewModel.updateSuccess.observe(viewLifecycleOwner) { success ->
             if (success) {
@@ -239,10 +273,13 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
         }
     }
 
+    /**
+     * Callback method for receiving the real estate details.
+     */
     override fun onGetRealEstateResponse(realEstateWithDetails: RealEstateWithDetails) {
         this.realEstateWithDetails = realEstateWithDetails
 
-        viewModel.setRealEstateWithDetails(realEstateWithDetails.realEstate.idRealEstate)
+        viewModel.setOriginalRealEstateId(realEstateWithDetails.realEstate.idRealEstate)
 
 
         // Initialize the Places API with the API key
@@ -283,7 +320,7 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
         addTextWatchers()
         addSpinnerListeners()
 
-        binding.btnAddImage.setOnClickListener {
+        binding.buttonAddImage.setOnClickListener {
             val dialog = AddPhotoDialog()
             dialog.setListener(this)
             dialog.show(parentFragmentManager, "AddPhotoDialog")
@@ -298,15 +335,22 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
         binding.buttonSubmit.setOnClickListener {
             viewModel.updateRealEstate()
             viewModel.updateISNextTo()
-            viewModel.addPhotos()
+            viewModel.addPhotos(requireContext())
             viewModel.removePhotos()
             findNavController().popBackStack()
         }
     }
+    /**
+     * Called when the view is destroyed.
+     */
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
+
+    /**
+     * Adds text watchers to EditText fields to update the ViewModel.
+     */
     private fun addTextWatchers() {
         binding.editPrice.addTextChangedListener(createTextWatcher { text ->
             realEstateWithDetails.realEstate.price = text.toInt()
@@ -357,24 +401,32 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             enableSubmitButton()
         }
     }
-
+    /**
+     * Updates the displayed price in Euro.
+     */
     private fun updatePriceInEuro(price: String) {
         val priceInEuro = try {
             Utils.convertDollarToEuro(price.toFloat())
         } catch (e: NumberFormatException) {
             0.0
         }
-        binding.textviewPriceInEuro.text = String.format("%d €", priceInEuro)
+        binding.textviewPriceInEuro.text = String.format(Locale.getDefault(),"%d €", priceInEuro)
     }
 
+    /**
+     * Updates the displayed surface in square meters.
+     */
     private fun updateSurfaceInM2(surface: String) {
         val surfaceInM2 = try {
             Utils.convertFtSquareToMSquare(surface.toFloat())
         } catch (e: NumberFormatException) {
             0.0
         }
-        binding.textviewSurfaceInM2.text = String.format("%d m²", surfaceInM2)
+        binding.textviewSurfaceInM2.text = String.format(Locale.getDefault(),"%d m²", surfaceInM2)
     }
+    /**
+     * Creates a TextWatcher to handle text changes and update the ViewModel.
+     */
     private fun createTextWatcher(update: (String) -> Unit): TextWatcher {
         return object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -385,6 +437,10 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             }
         }
     }
+
+    /**
+     * Adds listeners to the spinners to update the ViewModel.
+     */
     private fun addSpinnerListeners() {
         binding.spinnerRealtor.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
@@ -415,17 +471,27 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             override fun onNothingSelected(parent: AdapterView<*>) {}
         }
     }
+    /**
+     * Enables the submit button.
+     */
     private fun enableSubmitButton() {
         binding.buttonSubmit.isEnabled = true
     }
+
+    /**
+     * Callback method for adding a photo.
+     */
     override fun onPhotoDialogAdded(photoEntity: PhotoEntity) {
-        viewModel.addPhotoEntity(photoEntity)
+        viewModel.photoToAddEntity(photoEntity)
         adapterPhotos.addPhoto(photoEntity)
         enableSubmitButton()
     }
 
+    /**
+     * Callback method for removing a photo.
+     */
     override fun onPhotoRemoved(photoEntity: PhotoEntity) {
-        viewModel.removePhotoEntity(photoEntity)
+        viewModel.photoToRemove(photoEntity)
         adapterPhotos.removePhoto(photoEntity)
         enableSubmitButton()
     }

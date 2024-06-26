@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="300dp"
+        android:contentDescription="@string/photo"
         android:layout_centerInParent="true"
         android:scaleType="fitCenter"/>
     <TextView

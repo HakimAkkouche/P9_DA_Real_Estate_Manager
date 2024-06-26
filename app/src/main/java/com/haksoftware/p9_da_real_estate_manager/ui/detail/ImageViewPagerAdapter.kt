@@ -31,7 +31,6 @@ class ImageViewPagerAdapter(private val photoList: List<PhotoEntity>) : Recycler
     }
     inner class ViewPagerViewHolder(val binding: ItemImageSliderBinding) :
         RecyclerView.ViewHolder(binding.root) {
-
         fun setData(photo: PhotoEntity) {
 
             Glide.with(binding.root.context)
@@ -40,7 +39,5 @@ class ImageViewPagerAdapter(private val photoList: List<PhotoEntity>) : Recycler
                 .into(binding.imageView)
             binding.textDescription.text = photo.descriptionPhoto
         }
-
-
     }
 }

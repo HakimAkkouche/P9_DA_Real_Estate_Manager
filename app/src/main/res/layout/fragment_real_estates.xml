@@ -6,7 +6,8 @@
     android:id="@+id/sliding_pane_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.real_estates.RealEstatesFragment">
+    tools:context=".ui.real_estates.RealEstatesFragment"
+    tools:ignore="VisualLintBounds">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view_real_estates"

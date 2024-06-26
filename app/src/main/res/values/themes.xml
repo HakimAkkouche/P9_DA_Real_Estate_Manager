@@ -24,4 +24,5 @@
     <style name="Theme.P9_DA_Real_Estate_Manager.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="Theme.P9_DA_Real_Estate_Manager.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

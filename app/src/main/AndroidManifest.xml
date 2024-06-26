@@ -3,7 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools">
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="28"
         tools:ignore="ScopedStorage"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32" />
@@ -39,8 +38,9 @@
         </activity>
         <provider
             android:name=".provider.RealEstateContentProvider"
-            android:authorities="com.haksoftware.p9_da_real_estate_manager"
-            android:exported="false"/>
+            android:authorities="com.haksoftware.p9_da_real_estate_manager.provider"
+            android:exported="true"
+            android:grantUriPermissions="true" />
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

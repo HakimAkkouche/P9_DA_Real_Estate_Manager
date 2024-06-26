@@ -28,8 +28,9 @@ interface RealEstateDao {
     fun delete(realEstate: Int): Int
     @Query("select * from real_estate")
     fun getAllRealEstateCursor(): Cursor
+    @Query("select * from real_estate where idRealEstate = :realEstateId")
+    fun getRealEstateByIdCursor(realEstateId: Int): Cursor
     @Transaction
     @RawQuery
     fun searchRealEstates(query: SupportSQLiteQuery): List<RealEstateWithDetails>
-
 }
