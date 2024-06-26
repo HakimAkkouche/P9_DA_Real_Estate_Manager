@@ -3,13 +3,12 @@ package com.haksoftware.p9_da_real_estate_manager.ui.addrealestate
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.PhotoItemBinding
+import com.haksoftware.p9_da_real_estate_manager.ui.customview.PhotoItemView
+
 /**
  * Adapter for displaying and managing a list of photos in a RecyclerView.
  *
@@ -79,9 +78,7 @@ class AddPhotoAdapter(
      * ViewHolder class for holding photo item views.
      */
     inner class ItemViewHolder(binding: PhotoItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        private val imageView: ImageView = binding.showImageView
-        private val tvDesc: TextView = binding.imgDescription
-        private val imageButtonRemove: ImageButton = binding.imageButtonRemove
+        private val photoItemView: PhotoItemView = binding.photoItemView
 
         /**
          * Binds the photo data to the view elements.
@@ -90,10 +87,10 @@ class AddPhotoAdapter(
          * @param removePhotoListener The listener to handle photo removal events.
          */
         fun bind(photo: PhotoEntity, removePhotoListener: RemovePhotoListener) {
-            imageView.setImageURI(photo.namePhoto.toUri())
-            tvDesc.text = photo.descriptionPhoto
-            imageButtonRemove.visibility = View.VISIBLE
-            imageButtonRemove.setOnClickListener {
+            photoItemView.setImageURI(photo.namePhoto.toUri())
+            photoItemView.setDescription(photo.descriptionPhoto.toString())
+            photoItemView.setRemoveButtonVisibility(true)
+            photoItemView.setOnRemoveButtonClickListener {
                 removePhotoListener.onPhotoRemoved(photo)
             }
         }

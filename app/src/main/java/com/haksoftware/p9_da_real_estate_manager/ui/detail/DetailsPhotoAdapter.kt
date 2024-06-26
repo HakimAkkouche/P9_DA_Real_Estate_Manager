@@ -3,13 +3,12 @@ package com.haksoftware.p9_da_real_estate_manager.ui.detail
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
 import com.haksoftware.p9_da_real_estate_manager.databinding.PhotoItemBinding
+import com.haksoftware.p9_da_real_estate_manager.ui.customview.PhotoItemView
 
 /**
  * RecyclerView Adapter for displaying a list of photos with descriptions in a RecyclerView.
@@ -56,16 +55,14 @@ class DetailsPhotoAdapter(
      * @param binding The binding for the photo item layout.
      */
     class ItemViewHolder(binding: PhotoItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        private val imageView: ImageView = binding.showImageView
-        private val tvDesc: TextView = binding.imgDescription
-
+        private val photoItemView: PhotoItemView = binding.photoItemView
         /**
          * Binds the PhotoEntity data to the view.
          * @param photo The PhotoEntity object containing the photo and its description.
          */
         fun bind(photo: PhotoEntity) {
-            imageView.setImageURI(photo.namePhoto.toUri())
-            tvDesc.text = photo.descriptionPhoto
+            this.photoItemView.setImageURI(photo.namePhoto.toUri())
+            photoItemView.setDescription(photo.descriptionPhoto.toString())
         }
     }
 }
