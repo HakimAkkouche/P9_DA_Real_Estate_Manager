@@ -73,6 +73,7 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
             dialog.setListener(this)
             dialog.show(parentFragmentManager, "AddPhotoDialog")
         }
+
         return binding.root
     }
 
