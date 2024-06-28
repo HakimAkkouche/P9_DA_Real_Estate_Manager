@@ -139,24 +139,34 @@ class DetailFragment : Fragment(), MenuProvider {
         binding.textType.text = realEstateWithDetails.type.nameType
         binding.textDescription.text = realEstateWithDetails.realEstate.descriptionRealEstate
         binding.textPrice.text = formatNumberToUSStyle(realEstateWithDetails.realEstate.price)
-        binding.textPriceEuro.text = convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat())
+        binding.textPriceEuro.text =
+            convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat())
         binding.textSquareFeet.text = realEstateWithDetails.realEstate.squareFeet.toString()
         binding.textRoomCount.text = realEstateWithDetails.realEstate.roomCount.toString()
         binding.textBathroomCount.text = realEstateWithDetails.realEstate.bathroomCount.toString()
         binding.textAddress.text = realEstateWithDetails.realEstate.address
-        val zipCity = realEstateWithDetails.realEstate.postalCode + " " + realEstateWithDetails.realEstate.city
+        val zipCity =
+            realEstateWithDetails.realEstate.postalCode + " " + realEstateWithDetails.realEstate.city
         binding.textPostalCodeCity.text = zipCity
         binding.textState.text = realEstateWithDetails.realEstate.state
-        val realtorName = realEstateWithDetails.realtor.title + " " + realEstateWithDetails.realtor.lastname.uppercase() + " " + realEstateWithDetails.realtor.firstname
+        val realtorName =
+            realEstateWithDetails.realtor.title + " " + realEstateWithDetails.realtor.lastname.uppercase() + " " + realEstateWithDetails.realtor.firstname
         binding.textRealtor.text = realtorName
         binding.textRealtorNumber.text = realEstateWithDetails.realtor.phoneNumber
         binding.textRealtorEmail.text = realEstateWithDetails.realtor.email
 
-        binding.textCreationDate.text = getEpochToFormattedDate(realEstateWithDetails.realEstate.creationDate)
-        if(realEstateWithDetails.realEstate.soldDate != null) {
+        binding.textCreationDate.text =
+            getEpochToFormattedDate(realEstateWithDetails.realEstate.creationDate)
+        if (realEstateWithDetails.realEstate.soldDate != null) {
             binding.layoutSold.visibility = View.VISIBLE
-            binding.textSoldDate.text = getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
+            binding.textSoldDate.text =
+                getEpochToFormattedDate(realEstateWithDetails.realEstate.soldDate!!)
+        } else {
+
+            binding.layoutSold.visibility = View.GONE
+            binding.textSoldDate.text = ""
         }
+
 
         val address = realEstateWithDetails.realEstate.address + " " +realEstateWithDetails.realEstate.city
         CoroutineScope(Dispatchers.Main).launch {

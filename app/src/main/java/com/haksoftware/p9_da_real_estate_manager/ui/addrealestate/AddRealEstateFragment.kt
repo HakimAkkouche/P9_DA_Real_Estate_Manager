@@ -74,11 +74,6 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
             dialog.show(parentFragmentManager, "AddPhotoDialog")
         }
 
-        CoroutineScope(Dispatchers.Main).launch {
-            if (Utils.isInternetAvailable()) {
-                setupAutoCompleteTextView()
-            }
-        }
         return binding.root
     }
 
@@ -88,6 +83,11 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        CoroutineScope(Dispatchers.Main).launch {
+            if (Utils.isInternetAvailable()) {
+                setupAutoCompleteTextView()
+            }
+        }
         initRealtor()
         initTypes()
         initChips()
