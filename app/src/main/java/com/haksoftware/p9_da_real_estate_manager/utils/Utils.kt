@@ -31,17 +31,20 @@ object Utils {
     }
      */
     fun convertDollarToEuro(dollars: Float): String {
-        val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
-        return numberFormat.format((dollars * euroValue).roundToInt()) + " €"
+        try {
+           val numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE)
+           return numberFormat.format((dollars * euroValue).roundToInt()) + " €"
+        } catch (e: NumberFormatException) {
+            return ""
+       }
     }
-
     /**
      * Converts square feet to square meters.
      * @param surface Surface area in square feet to be converted to square meters
      * @return Surface area in square meters
      */
-    fun convertFtSquareToMSquare(surface: Float): Int {
-        return (surface / 10.764f).roundToInt()
+    fun convertFtSquareToMSquare(surface: Float): String {
+        return String.format(Locale.getDefault(),"%d m²", (surface / 10.764f).roundToInt())
     }
 
     /**

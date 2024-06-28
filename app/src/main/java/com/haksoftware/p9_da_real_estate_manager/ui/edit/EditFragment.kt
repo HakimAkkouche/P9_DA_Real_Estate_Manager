@@ -25,6 +25,7 @@ import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.haksoftware.p9_da_real_estate_manager.BuildConfig
+import com.haksoftware.p9_da_real_estate_manager.R
 import com.haksoftware.p9_da_real_estate_manager.data.entity.PhotoEntity
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealEstateWithDetails
 import com.haksoftware.p9_da_real_estate_manager.data.entity.RealtorEntity
@@ -292,7 +293,7 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
         binding.editPrice.setText( realEstateWithDetails.realEstate.price.toString())
         binding.textviewPriceInEuro.text = Utils.convertDollarToEuro(realEstateWithDetails.realEstate.price.toFloat())
         binding.editSurface.setText( realEstateWithDetails.realEstate.squareFeet.toString())
-        binding.textviewSurfaceInM2.text = Utils.convertFtSquareToMSquare(realEstateWithDetails.realEstate.squareFeet.toFloat()).toString()
+        binding.textviewSurfaceInM2.text = Utils.convertFtSquareToMSquare(realEstateWithDetails.realEstate.squareFeet.toFloat())
         binding.numberPickerRoomCount.value = realEstateWithDetails.realEstate.roomCount
         binding.numberPickerBathroomCount.value = realEstateWithDetails.realEstate.bathroomCount
 
@@ -337,7 +338,8 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             viewModel.updateISNextTo()
             viewModel.addPhotos(requireContext())
             viewModel.removePhotos()
-            findNavController().popBackStack()
+            viewModel.updateCurrentRealEstate(realEstateWithDetails)
+            findNavController().navigate(R.id.nav_real_estates)
         }
     }
     /**
@@ -353,16 +355,20 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
      */
     private fun addTextWatchers() {
         binding.editPrice.addTextChangedListener(createTextWatcher { text ->
-            realEstateWithDetails.realEstate.price = text.toInt()
-            viewModel.updateRealEstateWithDetails(realEstateWithDetails)
-            updatePriceInEuro(text)
+            if(text.isNotEmpty()) {
+                realEstateWithDetails.realEstate.price = text.toInt()
+                viewModel.updateRealEstateWithDetails(realEstateWithDetails)
+
+                binding.textviewPriceInEuro.text = Utils.convertDollarToEuro(text.toFloat())
+            }
         })
 
         binding.editSurface.addTextChangedListener(createTextWatcher { text ->
-            realEstateWithDetails.realEstate.squareFeet = text.toInt()
-            viewModel.updateRealEstateWithDetails(realEstateWithDetails)
-            updateSurfaceInM2(text)
-
+            if(text.isNotEmpty()) {
+                realEstateWithDetails.realEstate.squareFeet = text.toInt()
+                viewModel.updateRealEstateWithDetails(realEstateWithDetails)
+                binding.textviewSurfaceInM2.text = Utils.convertFtSquareToMSquare(text.toFloat())
+            }
         })
 
         binding.editDescription.addTextChangedListener(createTextWatcher { text ->
@@ -400,29 +406,6 @@ class EditFragment : Fragment(), GetRealEstateCallBack, AddPhotoDialogListener, 
             viewModel.updateRealEstateWithDetails(realEstateWithDetails)
             enableSubmitButton()
         }
-    }
-    /**
-     * Updates the displayed price in Euro.
-     */
-    private fun updatePriceInEuro(price: String) {
-        val priceInEuro = try {
-            Utils.convertDollarToEuro(price.toFloat())
-        } catch (e: NumberFormatException) {
-            0.0
-        }
-        binding.textviewPriceInEuro.text = String.format(Locale.getDefault(),"%d €", priceInEuro)
-    }
-
-    /**
-     * Updates the displayed surface in square meters.
-     */
-    private fun updateSurfaceInM2(surface: String) {
-        val surfaceInM2 = try {
-            Utils.convertFtSquareToMSquare(surface.toFloat())
-        } catch (e: NumberFormatException) {
-            0.0
-        }
-        binding.textviewSurfaceInM2.text = String.format(Locale.getDefault(),"%d m²", surfaceInM2)
     }
     /**
      * Creates a TextWatcher to handle text changes and update the ViewModel.

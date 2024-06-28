@@ -10,7 +10,6 @@ import io.mockk.mockkStatic
 import io.mockk.unmockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.runBlockingTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.*
 
@@ -83,7 +82,7 @@ class UtilsTest {
     @Test
     fun convertFtSquareToMSquare() {
         val result = Utils.convertFtSquareToMSquare(1000f)
-        val expectation = 93
+        val expectation = "93 m²"
         assertEquals(expectation, result)
     }
 

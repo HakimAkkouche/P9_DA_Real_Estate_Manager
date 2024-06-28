@@ -174,8 +174,6 @@
                     app:singleLine="false"
                     android:layout_marginTop="16dp"/>
             </TableRow>
-
-            <!-- Third Row: layout_location (wrapped in a TableRow for spanning) -->
             <TableRow
                 android:padding="5dp"
                 android:gravity="center">
@@ -214,8 +212,6 @@
                     </LinearLayout>
                 </LinearLayout>
             </TableRow>
-
-            <!-- Fourth Row: mapImageView (wrapped in a TableRow for spanning) -->
             <TableRow>
                 <ImageView
                     android:id="@+id/mapImageView"

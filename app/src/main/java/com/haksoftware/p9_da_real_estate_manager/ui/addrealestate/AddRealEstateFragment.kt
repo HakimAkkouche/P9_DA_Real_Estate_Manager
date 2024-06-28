@@ -239,13 +239,13 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
         binding.editPrice.addTextChangedListener(createTextWatcher {
             viewModel.updatePrice(it)
             if (it.isNotEmpty()) {
-                updatePriceInEuro(it)
+                binding.textviewPriceInEuro.text = Utils.convertDollarToEuro(it.toFloat())
             }
         })
         binding.editSurface.addTextChangedListener(createTextWatcher {
             viewModel.updateSurface(it)
             if (it.length > 2) {
-                updateSurfaceInM2(it)
+                binding.textviewSurfaceInM2.text = Utils.convertFtSquareToMSquare(it.toFloat())
             }
         })
         binding.editDescription.addTextChangedListener(createTextWatcher { viewModel.updateDescription(it) })
@@ -285,31 +285,6 @@ class AddRealEstateFragment : Fragment(), AddPhotoDialogListener, RemovePhotoLis
             viewModel.updatePointsOfInterest(checkedIds)
         }
     }
-
-    /**
-     * Updates the price in Euro based on the given price in dollars.
-     */
-    private fun updatePriceInEuro(price: String) {
-        val priceInEuro = try {
-            Utils.convertDollarToEuro(price.toFloat())
-        } catch (e: NumberFormatException) {
-            0.0
-        }
-        binding.textviewPriceInEuro.text = priceInEuro.toString()
-    }
-
-    /**
-     * Updates the surface in square meters based on the given surface in square feet.
-     */
-    private fun updateSurfaceInM2(surface: String) {
-        val surfaceInM2 = try {
-            Utils.convertFtSquareToMSquare(surface.toFloat())
-        } catch (e: NumberFormatException) {
-            0.0
-        }
-        binding.textviewSurfaceInM2.text = String.format(Locale.getDefault(), "%d m²", surfaceInM2)
-    }
-
     /**
      * Creates a TextWatcher with the specified update function.
      */

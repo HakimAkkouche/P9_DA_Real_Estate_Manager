@@ -74,8 +74,8 @@ class LoanSimulatorViewModel : ViewModel() {
         val monthlyInterestRate = interestRate.value / 100 / 12
         val numberOfPayments = loanDuration.value * 12
         val monthlyPayment = loanAmount.value * monthlyInterestRate / (1 - (1 + monthlyInterestRate).pow(-numberOfPayments))
-        _monthlyPayment.value = "Monthly payment: %s".format(formatNumberToUSStyle((monthlyPayment).toInt()))
-        _totalCost.value = "Total cost: %s".format(formatNumberToUSStyle((monthlyPayment * numberOfPayments).toInt()))
-        _interestCost.value = "Loan cost: %s".format(formatNumberToUSStyle((monthlyPayment * numberOfPayments - loanAmount.value).toInt()))
+        _monthlyPayment.value = "Monthly payment : %s".format(formatNumberToUSStyle((monthlyPayment).toInt()))
+        _totalCost.value = "Total cost : %s".format(formatNumberToUSStyle((monthlyPayment * numberOfPayments).toInt()))
+        _interestCost.value = "Loan cost : %s".format(formatNumberToUSStyle((monthlyPayment * numberOfPayments - loanAmount.value).toInt()))
     }
 }
