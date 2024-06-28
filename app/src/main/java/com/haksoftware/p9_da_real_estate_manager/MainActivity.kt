@@ -1,86 +1,84 @@
 package com.haksoftware.p9_da_real_estate_manager
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.navigation.NavigationView
 import androidx.navigation.findNavController
-import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavController
 import com.haksoftware.p9_da_real_estate_manager.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
+
         setContentView(binding.root)
+
         setSupportActionBar(binding.appBarMain.toolbar)
 
-        binding.appBarMain.fab?.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
-        }
+        val drawerLayout: DrawerLayout = binding.drawerLayout
+        val navView: NavigationView = binding.navView
+        navController = findNavController(R.id.nav_host_fragment_content_main)
 
-        val navHostFragment =
-            (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
-        val navController = navHostFragment.navController
-
-        binding.navView?.let {
-            appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_transform, R.id.nav_reflow, R.id.nav_slideshow, R.id.nav_settings
-                ),
-                binding.drawerLayout
-            )
-            setupActionBarWithNavController(navController, appBarConfiguration)
-            it.setupWithNavController(navController)
-        }
-
-        binding.appBarMain.contentMain.bottomNavView?.let {
-            appBarConfiguration = AppBarConfiguration(
-                setOf(
-                    R.id.nav_transform, R.id.nav_reflow, R.id.nav_slideshow
-                )
-            )
-            setupActionBarWithNavController(navController, appBarConfiguration)
-            it.setupWithNavController(navController)
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val result = super.onCreateOptionsMenu(menu)
-        // Using findViewById because NavigationView exists in different layout files
-        // between w600dp and w1240dp
-        val navView: NavigationView? = findViewById(R.id.nav_view)
-        if (navView == null) {
-            // The navigation drawer already has the items including the items in the overflow menu
-            // We only inflate the overflow menu if the navigation drawer isn't visible
-            menuInflater.inflate(R.menu.overflow, menu)
-        }
-        return result
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.nav_settings -> {
-                val navController = findNavController(R.id.nav_host_fragment_content_main)
-                navController.navigate(R.id.nav_settings)
-            }
-        }
-        return super.onOptionsItemSelected(item)
+        // Passing each menu ID as a set of Ids because each
+        // menu should be considered as top level destinations.
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.nav_real_estates, R.id.nav_detail, R.id.nav_add, R.id.nav_edit
+            ), drawerLayout
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        navView.setupWithNavController(navController)
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 }
+/*
+
+public class MainActivity extends AppCompatActivity {
+
+    private TextView textViewMain;
+    private TextView textViewQuantity;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        //this.textViewMain = findViewById(R.id.activity_second_activity_text_view_main);
+        //find the correct id from the main fragment
+        this.textViewMain = findViewById(R.id.activity_main_activity_text_view_main);
+        this.textViewQuantity = findViewById(R.id.activity_main_activity_text_view_quantity);
+
+        this.configureTextViewMain();
+        this.configureTextViewQuantity();
+    }
+
+    private void configureTextViewMain(){
+        this.textViewMain.setTextSize(15);
+        this.textViewMain.setText("Le premier bien immobilier enregistré vaut ");
+    }
+
+    private void configureTextViewQuantity(){
+        int quantity = Utils.convertDollarToEuro(100);
+        this.textViewQuantity.setTextSize(20);
+        //this.textViewQuantity.setText(quantity);
+        //correction : value needs to be converted to String
+        this.textViewQuantity.setText(String.valueOf(quantity));
+    }
+}
+
+ */

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.slidingpanelayout.widget.SlidingPaneLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/sliding_pane_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.real_estates.RealEstatesFragment"
+    tools:ignore="VisualLintBounds">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view_real_estates"
+        android:layout_width="550dp"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/detail_pane"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_detail"
+        android:name="com.haksoftware.p9_da_real_estate_manager.ui.detail.DetailFragment"/>
+
+</androidx.slidingpanelayout.widget.SlidingPaneLayout>
